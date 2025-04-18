@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DFX Console - v99 (Refined v18 - Enhanced Slider)</title> <!-- Title Updated -->
+    <title>DFX Console - v99 (Refined v19 - Click Pop)</title> <!-- Title Updated -->
     <!-- GSAP Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- GSAP TextPlugin -->
@@ -48,11 +48,13 @@
 
      /* --- 1.2 Radii --- */
      --semantic-radius-s: 0.25rem;  /* 4px */
+     --semantic-radius-sm: 0.375rem; /* 6px */
      --semantic-radius-m: 0.5rem;   /* 8px */
      --semantic-radius-l: 1rem;     /* 16px */
-     --semantic-radius-xl: 2rem;    /* 32px */
+     --semantic-radius-lg: 1.5rem;   /* 24px */
+     --semantic-radius-xl: 2.5rem;    /* 32px */
      /* Slider radii already defined above */
-     --master-panel-radius: 2.5rem; /* 40px */
+     --master-panel-radius: 3rem; /* 40px */
 
      /* --- 1.3 Fonts --- */
      --font-headings: 'Raleway', sans-serif;
@@ -116,7 +118,7 @@
      --toggle-active-bg: var(--panel-bg-elevated); /* Legacy for slider thumb if needed */
      --button-active-bg: oklch(1 0 0); /* Segmented button & Slider thumb active background */
      --dial-base-stroke: oklch(0.80 0 0);
-     --dial-value-text: oklch(0.20 0 0);
+     --dial-value-text: oklch(0.20 0 0); /* This variable is set by JS, but .dial-value-display now uses --secondary-text */
 
      /* 1.6.3 Component-Specific Colors */
      --console-text-color: #333333;
@@ -161,7 +163,7 @@
     --faint-control-text: oklch(0.5 0.09 var(--brand-hue)); /* Used for inactive segmented buttons */
     --toggle-active-text: oklch(0 0 0);
     --toggle-inactive-text: oklch(0.20 0 0); /* Used ONLY for disabled action button */
-    --dial-value-text: oklch(0 0 0);
+    /* --dial-value-text: oklch(0 0 0); */ /* .dial-value-display now uses --secondary-text */
     --dial-base-stroke: 'var(--panel-border-color)';
     /* Saturated theme uses light panel background */
     --panel-bg-elevated: oklch(1.00 0.00 0);
@@ -186,7 +188,7 @@
      --toggle-active-bg: #333333;
      --button-active-bg: oklch(0.30 0.01 var(--brand-hue));
      --dial-base-stroke: oklch(0.33 0 0);
-     --dial-value-text: oklch(0.88 0 0);
+     /* --dial-value-text: oklch(0.88 0 0); */ /* .dial-value-display now uses --secondary-text */
      /* Update slider thumb shadow for dark theme */
      --slider-thumb-shadow: var(--control-shadow);
  }
@@ -267,7 +269,7 @@
  #message-box-content div { width: 100%; }
 
  /* --- 4.3 Control Section & Panels --- */
- #control-section { display: flex; justify-content: center; align-items: stretch; gap: var(--panel-gap); align-self: stretch; border-left: 1px solid var(--panel-border-color); border-right: 1px solid var(--panel-border-color); border-top: none; /* Seamless connection to display section */ border-bottom: none; border-radius: 0; overflow: visible; }
+ #control-section { display: flex; justify-content: center; align-items: stretch; gap: var(--panel-gap); align-self: stretch; border-left: 1px solid var(--panel-border-color); border-right: 1px solid var(--panel-border-color); border-top: none; /* Seamless connection to display section */ border-bottom: none; /* UPDATED: No bottom border, footer will have top border */ border-radius: 0; overflow: visible; background-color: var(--panel-bg-elevated); /* Ensure it has a background */ }
  .control-panel { border: none; border-radius: 0; padding: var(--semantic-space-m); display: flex; flex-direction: column; align-items: center; gap: var(--semantic-space-s); background-color: var(--panel-bg-elevated); transition: background-color var(--transition-duration-slow) var(--transition-ease); border-right: none; border-bottom: none; /* Seamless connection to footer */ }
  #environment-panel, #hover-panel { flex-grow: 1; flex-basis: 0; min-width: 0; }
  #tap-panel { flex-grow: 0; flex-shrink: 0; flex-basis: auto; width: 8.9375rem; }
@@ -275,25 +277,134 @@
  #control-section > #hover-panel { border-bottom-right-radius: 0; }
  .panel-label { color: var(--secondary-text); font-family: var(--font-headings); font-size: var(--label-medium-font-size); font-weight: var(--label-font-weight); line-height: 120%; letter-spacing: 0.015rem; margin-bottom: 0.5rem; text-align: center; width: 100%; margin-top: 0; transition: color var(--transition-duration-slow) var(--transition-ease), opacity var(--transition-duration-slow) var(--transition-ease); }
 
- /* --- 4.4 Footer Credit Section --- */
- #footer-credit {
-    padding: var(--semantic-space-m) var(--semantic-space-xl) var(--semantic-space-xl);
-    text-align: center;
-    color: oklch(from var(--faint-control-text) l c h / 0.5);
-    font-family: var(--font-headings);
-    font-size: var(--footer-font-size);
-    line-height: 1.4;
-    white-space: pre-line;
+ /* --- 4.4 Footer Credit Section (Hugging Button, Centered Text on Hover) --- */
+
+ /* Outer container: Provides background, borders, outer padding, bottom radius, and centers the button */
+ #footer-container {
+    /* Padding around the inner button: 1rem */
+    padding: var(--semantic-space-m);
+
+    /* Center the inline-flex button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Background color matching other panels */
+    background-color: var(--panel-bg-elevated);
+
+    /* Borders (No top border) */
     border-left: 1px solid var(--panel-border-color);
     border-right: 1px solid var(--panel-border-color);
     border-bottom: 1px solid var(--panel-border-color);
+
+    /* Large bottom radius matching master panel */
     border-radius: 0 0 var(--semantic-radius-xl) var(--semantic-radius-xl);
-    background-color: var(--panel-bg-elevated);
-    transition: color var(--transition-duration-slow) var(--transition-ease),
-                border-color var(--transition-duration-slow) var(--transition-ease),
-                background-color var(--transition-duration-slow) var(--transition-ease);
+
+    /* Transitions */
+    transition: background-color var(--transition-duration-slow) var(--transition-ease),
+                border-color var(--transition-duration-slow) var(--transition-ease);
  }
 
+ /* Inner interactive link (the "hugging" button) */
+ #footer-credit {
+    display: inline-flex; /* Size based on content */
+    align-items: center; /* Vertically align text and icon */
+
+    /* Default Inner padding */
+    padding-top: var(--semantic-space-s);    /* 8px */
+    padding-bottom: var(--semantic-space-s); /* 8px */
+    padding-left: var(--semantic-space-m);   /* 16px */
+    padding-right: var(--semantic-space-m);  /* 16px */
+
+    /* Font styling */
+    font-family: var(--font-headings);
+    font-size: var(--footer-font-size);
+    line-height: 1.5;
+    text-decoration: none;
+    white-space: nowrap;
+
+    /* Default appearance */
+    color: var(--faint-control-text);
+    background-color: transparent;
+    border: none;
+
+    /* Consistent border radius */
+    border-radius: var(--semantic-radius-m); /* 8px */
+
+    cursor: pointer;
+    /* Add padding-left to transition for smooth expansion */
+    transition: color var(--transition-duration-medium) var(--transition-ease),
+                background-color var(--transition-duration-medium) var(--transition-ease),
+                padding-left var(--transition-duration-medium) var(--transition-ease);
+ }
+
+ /* Hover state for the inner link */
+ #footer-credit:hover {
+    color: var(--secondary-text);
+    background-color: var(--interactive-bg-hover);
+    /* Increase left padding to match space added by icon+gap on right */
+    /* Calculation: original_horizontal_padding + icon_width + icon_gap */
+    padding-left: calc(var(--semantic-space-m) + 1.125em + var(--semantic-space-xs));
+    /* Right padding remains the same */
+    padding-right: var(--semantic-space-m);
+ }
+
+ /* Text inside the link */
+ #footer-credit .footer-text {
+    /* No specific styles needed */
+ }
+
+ /* Icon inside the link (Initial state - hidden, takes no space) */
+ #footer-credit .footer-icon {
+    font-size: 1.125em; /* Larger icon size */
+    line-height: 1;
+    opacity: 0; /* Hidden */
+    width: 0; /* Takes no width */
+    margin-left: 0; /* No gap */
+    overflow: hidden;
+    vertical-align: middle;
+    pointer-events: none;
+    /* Transition width and margin for smooth appearance */
+    transition: opacity var(--transition-duration-medium) var(--transition-ease),
+                width var(--transition-duration-medium) var(--transition-ease),
+                margin-left var(--transition-duration-medium) var(--transition-ease);
+ }
+
+ /* Icon inside the link (Hover state - visible, takes space) */
+ #footer-credit:hover .footer-icon {
+    opacity: 1; /* Visible */
+    width: 1.125em; /* Match the font-size */
+    margin-left: var(--semantic-space-xs); /* Create gap (4px) */
+    pointer-events: auto;
+ }
+
+
+ /* --- Mobile Footer Adjustments --- */
+ @media (max-width: 500px) {
+    #footer-container {
+        /* Reduce padding around the button */
+        padding: var(--semantic-space-s); /* 8px */
+    }
+    #footer-credit {
+        /* Make button more compact vertically */
+        padding-top: var(--semantic-space-xs);    /* 4px */
+        padding-bottom: var(--semantic-space-xs); /* 4px */
+        /* Adjust horizontal padding for mobile */
+        padding-left: var(--semantic-space-s);   /* 8px */
+        padding-right: var(--semantic-space-s);  /* 8px */
+        line-height: 1.3;
+        /* Consistent radius */
+        border-radius: var(--semantic-radius-m);
+    }
+    /* Adjust hover padding-left for mobile */
+    #footer-credit:hover {
+       /* Calculation: original_mobile_horizontal_padding + icon_width + icon_gap */
+       padding-left: calc(var(--semantic-space-s) + 1.125em + var(--semantic-space-xs));
+       /* Right padding remains the same mobile value */
+       padding-right: var(--semantic-space-s);
+    }
+    /* Icon hover behavior (width, margin, opacity) is inherited */
+ }
  /* ==========================================================================
     5. Specific Components
     ========================================================================== */
@@ -592,7 +703,16 @@
  .dial-svg:hover .dial-base { fill: var(--interactive-bg-hover); }
  .dial-indicator { stroke: var(--accent-color); stroke-width: 3; stroke-linecap: round; transition: stroke var(--transition-duration-fast) var(--transition-ease); }
  .dial-division { stroke: var(--accent-color); stroke-linecap: round; transition: stroke var(--transition-duration-fast) var(--transition-ease); }
- .dial-value-display { font-family: var(--font-monospace); font-size: var(--value-font-size); font-weight: var(--value-font-weight); color: var(--dial-value-text); text-align: center; min-width: 1.875rem; margin-top: 0.125rem; transition: color var(--transition-duration-slow) var(--transition-ease); }
+ .dial-value-display {
+    font-family: var(--font-monospace);
+    font-size: var(--value-font-size);
+    font-weight: var(--value-font-weight);
+    color: var(--secondary-text); /* UPDATED: Use secondary-text for dial values */
+    text-align: center;
+    min-width: 1.875rem;
+    margin-top: 0.125rem;
+    transition: color var(--transition-duration-slow) var(--transition-ease);
+ }
  .dial-value-display[data-value-id="waveDirection"]::after { content: '°'; }
 
  /* --- 5.5 SVG Element Styling --- */
@@ -615,7 +735,9 @@
  body.app-sleeping .hue-slider-thumb-container { cursor: default !important; }
  body.app-sleeping .dimmable-content :is(button, input[type=range], .dial-svg) { cursor: default !important; }
  /* Footer text opacity is handled directly, not dimmed further */
- body.app-sleeping #footer-credit { pointer-events: auto; }
+ body.app-sleeping #footer-container { pointer-events: auto; } /* Allow outer container */
+ body.app-sleeping #footer-credit { pointer-events: auto; cursor: default; } /* Allow inner link, but default cursor */
+
 
  /* ==========================================================================
     7. Responsive Design (Mobile)
@@ -722,11 +844,12 @@
       #hover-panel { order: 3; display: none; }
 
       /* --- 7.5 Footer --- */
+       #footer-container {
+           padding: var(--semantic-space-s) var(--semantic-space-xl); /* Reduce outer padding */
+           /* border-radius, border-left, border-right, border-bottom, border-top are inherited */
+       }
        #footer-credit {
-           border-radius: 0 0 var(--semantic-radius-xl) var(--semantic-radius-xl);
-           border-left: 1px solid var(--panel-border-color);
-           border-right: 1px solid var(--panel-border-color);
-           border-bottom: 1px solid var(--panel-border-color); /* Bottom border */
+           padding: var(--semantic-space-s) var(--semantic-space-s); /* Keep inner padding */
        }
 
       /* --- 7.6 Component Adjustments --- */
@@ -829,8 +952,13 @@
                      </div>
                 </div>
 
-                <!-- Footer Credit Section -->
-                <div id="footer-credit">Made with pixels. © Dave Thompson Design</div>
+                <!-- Footer Credit Section (UPDATED HTML Structure) -->
+                <div id="footer-container">
+                    <a id="footer-credit" href="https://davethompson.design" target="_blank" rel="noopener noreferrer">
+                        <span class="footer-text">Made with pixels. © Dave Thompson Design</span>
+                        <span class="material-symbols-outlined footer-icon">open_in_new</span>
+                    </a>
+                </div>
 
             </div> <!-- END control-console-frame -->
         </div> <!-- END master-panel-wrapper -->
@@ -863,8 +991,8 @@
         // --- Application Messages (Used by getNextMessage) ---
         const appMessages = {
             // Startup / Master Toggle
-            startup: ["DFX 9000 Online", "System activated", "Ready for interaction", "Console initialized"],
-            sleep: ["Entering sleep mode", "System standby", "Powering down effects", "Goodnight, dots"],
+            startup: ["DFX 1000 Online", "System activated", "Ready for interaction", "Console initialized"],
+            sleep: ["Entering sleep mode", "System standby", "Powering down", "Goodnight, dots"],
             activate: ["System activated", "Waking up...", "Effects online", "Let's get interactive!"],
             // Hue Changes
             hueRed: ["Feeling fiery red", "Red spectrum engaged", "Warming things up", "Hue: Crimson"],
@@ -875,24 +1003,24 @@
             hueBlue: ["Deep blue spectrum", "Oceanic vibes", "Midnight sky", "Hue: Azure"],
             huePurple: ["Purple reigns", "Violet spectrum", "Magenta magic", "Hue: Amethyst"],
             // Tap Actions
-            bomb: ["Kapow!", "Bam!", "Wham!", "Bombs away!", "Checkmate", "Direct hit", "Photon torpedos launched", "Target acquired", "That's the spot!"],
+            bomb: ["Kapow!", "Bam!", "Wham!", "Bombs away!", "Checkmate", "Direct hit", "Photon torpedos launched", "Target acquired", "Destruction was a last resort"],
             shake: ["Shake it!", "Shakin', not stirred...", "Rumble!", "Quake activated!", "Jiggle physics!"],
             pulse: ["Resonance engaged", "Oscillations initiated", "Dotwave propagating", "Signal sent", "Pulse wave!"],
             // Effect Mode Changes
             effectWave: ["Light sweep online", "Wavy gravy", "Pixel surf", "Photon tsunami", "Wave mode activated"],
-            effectSparkle: ["Make it sparkle", "Pixel confetti", "Bit bling", "LED it snow", "Sparkle mode engaged"],
+            effectSparkle: ["Make it sparkle", "Pixel confetti", "The world needs more sparkle", "Bit bling", "LED it snow", "Sparkle mode engaged"],
             // Hover Mode Changes
             hoverAttract: ["Gravity field anchored", "Inward bias activated", "Field compression: ON", "Attraction mode"],
-            hoverRepel: ["Negative charge applied", "Gravity field reversed", "Evasive pattern applied", "Repulsion mode"],
+            hoverRepel: ["Negative charge applied", "Gravity field reversed", "Evasive pattern applied", "Not everything is meant to be together", "Repulsion mode"],
             // Theme Changes
             themeLight: ["Light theme set", "Classic illumination", "Day mode"],
             themeSaturated: ["Saturated theme active", "Vibrant colors engaged", "Chroma boost!"],
             themeDark: ["Dark theme set", "Entering the void", "Night mode"],
             // Dial Adjustments
-            dialMax: ["Setting to 11? Holy Smokes", "Maximum Power!", "Limit Reached!", "Full throttle!", "Cranked to the max!"],
+            dialMax: ["Setting to 11? Holy Smokes", "Maximum Power!", "Limit Reached", "Full throttle", "11 set. Good gracious", "Cranked to the max!"],
             dialMin: ["Nice and easy", "Minimum reached", "Dialed down", "Lowest setting", "Taking it slow"],
             dialIncreaseGeneric: ["Parameter increased", "Boosting level", "Turning it up", "More power!"],
-            dialDecreaseGeneric: ["Parameter decreased", "Lowering level", "Dialing it back", "Less intensity"],
+            dialDecreaseGeneric: ["Parameter decreased", "Lowering level", "How low can we go", "Dialing it back", "Less intensity"],
             dialIncreaseFreq: ["Frequency up", "Faster pulses", "Increasing rate", "Higher tempo"],
             dialDecreaseFreq: ["Frequency down", "Slower pulses", "Decreasing rate", "Lower tempo"],
             // Direction Specific (Example - Can be expanded)
@@ -900,7 +1028,7 @@
             directionSouth: ["Flying South", "Southward trajectory"],
             directionWest: ["Go West", "Westward ho!"],
             directionNorth: ["Traveling North", "Northward path"],
-            directionGeneral: ["Direction changed", "New heading set", "Orientation updated"],
+            directionGeneral: ["This is the way", "Direction changed", "New heading set", "Orientation updated"],
         };
 
 
@@ -915,7 +1043,8 @@
                  panelBgSunken: { l: 0.93, c: 0.01, h: 0, hueSensitive: true }, panelBorder: { l: 0.89, c: 0.02, hueSensitive: true },
                  panelText: { l: 0.10, c: 0.02, h: 270 }, panelLabel: { l: 0.10, c: 0.02, h: 270 },
                  toggleActiveText: { l: 0.07, c: 0.1, h: 0 }, toggleInactiveText: { l: 0.37, c: 0.21, h: 0 },
-                 dialBaseStroke: { l: 0.80, c: 0.00, h: 0 }, dialValueText: { l: 0.20, c: 0.00, h: 0 },
+                 dialBaseStroke: { l: 0.80, c: 0.00, h: 0 },
+                 // dialValueText: { l: 0.20, c: 0.00, h: 0 }, // .dial-value-display now uses --secondary-text
                  gridLine: { l: 0.5, c: 0.13, a: 0.30, hueSensitive: true }, dotSleep: { l: 0.78, c: 0.03, h: 270, hueSensitive: false },
                  accent: { l: 0.51, c: 0.08, hueSensitive: true }, interactiveBg: { l: 0.30, c: 0.036, a: 0.06, hueSensitive: true },
                  interactiveBgHover: { l: 0.47, c: 0.191, a: 0.10, hueSensitive: true }, interactiveBgPressed:{ l: 0.42, c: 0.191, a: 0.10, hueSensitive: true },
@@ -935,7 +1064,7 @@
                  panelBgSunken: { l: 0.92, c: 0.03, hueSensitive: true }, panelBorder: { l: 0.90, c: 0.05, hueSensitive: true },
                  panelText: { l: 0.00, c: 0.00, h: 0 }, panelLabel: { l: 0.00, c: 0.00, h: 0 },
                  toggleActiveText: { l: 0.00, c: 0.00, h: 0 }, toggleInactiveText: { l: 0.20, c: 0.00, h: 0 },
-                 dialValueText: { l: 0.00, c: 0.00, h: 0 },
+                 // dialValueText: { l: 0.00, c: 0.00, h: 0 }, // .dial-value-display now uses --secondary-text
                  gridLine: { l: 0.50, c: 0.03, a: 0.40, hueSensitive: true }, dotSleep: { l: 0.40, c: 0.10, hueSensitive: true },
                  accent: { l: 0.40, c: 0.15, hueSensitive: true }, interactiveBg: { l: 0.50, c: 0.15, a: 0.10, hueSensitive: true },
                  interactiveBgHover: { l: 0.47, c: 0.310, a: 0.10, hueSensitive: true }, interactiveBgPressed:{ l: 0.42, c: 0.310, a: 0.10, hueSensitive: true },
@@ -954,7 +1083,8 @@
                  panelBgSunken: { l: 0.15, c: 0.00, h: 0, hueSensitive: true }, panelBorder: { l: 0.55, c: 0.02, hueSensitive: true },
                  panelText: { l: 0.88, c: 0.00, h: 0 }, panelLabel: { l: 0.88, c: 0.00, h: 0 },
                  toggleActiveText: { l: 1.00, c: 0.00, h: 0 }, toggleInactiveText: { l: 0.67, c: 0.00, h: 0 },
-                 dialBaseStroke: { l: 0.33, c: 0.00, h: 0 }, dialValueText: { l: 0.88, c: 0.00, h: 0 },
+                 dialBaseStroke: { l: 0.33, c: 0.00, h: 0 },
+                 // dialValueText: { l: 0.88, c: 0.00, h: 0 }, // .dial-value-display now uses --secondary-text
                  gridLine: { l: 0.45, c: 0.04, a: 0.75, hueSensitive: true }, dotSleep: { l: 0.33, c: 0.01, h: 270, hueSensitive: false },
                  accent: { l: 0.82, c: 0.08, hueSensitive: true }, interactiveBg: { l: 0.70, c: 0.036, a: 0.06, hueSensitive: true },
                  interactiveBgHover: { l: 0.53, c: 0.191, a: 0.10, hueSensitive: true }, interactiveBgPressed:{ l: 0.45, c: 0.20, a: 0.10, hueSensitive: true },
@@ -1165,6 +1295,7 @@
                  hoverTypeToggle: document.getElementById('hover-type-toggle'),
                  consolePanel: document.getElementById('console-panel'),
                  messageBoxContainer: document.getElementById('message-box-container'),
+                 footerContainer: document.getElementById('footer-container'), // NEW
                  footerCredit: document.getElementById('footer-credit'),
                  cursorGravityCircle: null,
                  waveControls: document.querySelectorAll('#effect-dials .dial-container[data-effect-type="wave"]'),
@@ -1173,7 +1304,7 @@
              document.querySelectorAll('[data-dial-id]').forEach(el => { refs[`dial_${el.dataset.dialId}`] = el; });
              document.querySelectorAll('[data-value-id]').forEach(el => { refs[`value_${el.dataset.valueId}`] = el; });
              document.querySelectorAll('.dial-indicator-group').forEach(el => { const dial = el.closest('.dial-svg'); if (dial && dial.dataset.dialId) { refs[`indicator_${dial.dataset.dialId}`] = el; } });
-             const criticalKeys = ['masterPanelWrapper', 'svgElement', 'svgContainer', 'displaySection', 'masterToggle', 'themeToggle', 'hueSliderContainer', 'hueTrack', 'hueThumbContainer', 'hueThumb', 'thumbIcon', 'hueHoverLine', 'masterTitle', 'messageBoxContent', 'consolePanel', 'messageBoxContainer', 'waveControls', 'sparkleControls', 'effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'footerCredit'];
+             const criticalKeys = ['masterPanelWrapper', 'svgElement', 'svgContainer', 'displaySection', 'masterToggle', 'themeToggle', 'hueSliderContainer', 'hueTrack', 'hueThumbContainer', 'hueThumb', 'thumbIcon', 'hueHoverLine', 'masterTitle', 'messageBoxContent', 'consolePanel', 'messageBoxContainer', 'waveControls', 'sparkleControls', 'effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'footerContainer', 'footerCredit']; // Added footerContainer
              let refsOk = true;
              for (const key of criticalKeys) { if (key && (!refs[key] || (refs[key] instanceof NodeList && refs[key].length === 0))) { console.error(`DOM Ref Error: Critical element '${key}' not found or empty.`); refsOk = false; } }
              if (typeof dialConfigs !== 'undefined') {
@@ -1220,7 +1351,10 @@
             if (state.currentTheme === 'saturated') { const baseDotLC = currentThemeDef.accent; calculatedDotRestingColor = formatOklch(baseDotLC, hue); const hoverL = Math.min(1.0, baseDotLC.l + config.SATURATED_HOVER_LIGHTNESS_INCREASE); const hoverC = baseDotLC.c + config.SATURATED_HOVER_CHROMA_INCREASE; calculatedDotHoverColor = formatOklch({ l: hoverL, c: hoverC }, hue); } else { calculatedDotRestingColor = currentThemeDef.dotRestingColor; calculatedDotHoverColor = formatOklch(currentThemeDef.dotHover, hue); if (typeof calculatedDotRestingColor !== 'string') { calculatedDotRestingColor = (state.currentTheme === 'dark') ? '#E0E0E0' : '#333333'; console.warn("Used fallback dotRestingColor"); } }
             setVar('--dot-resting-color', calculatedDotRestingColor); setVar('--dot-hover-color', calculatedDotHoverColor);
             const bombRingDef = currentThemeDef.bombRing; if (bombRingDef && typeof bombRingDef === 'object') { state.currentRingHue = bombRingDef.hueSensitive ? hue : (bombRingDef.h ?? hue); } else { state.currentRingHue = hue; }
-            const keyToVarMap = { bodyTextColor: '--body-text-color', panelBgBase: '--panel-bg-base', panelBgElevated: '--panel-bg-elevated', panelBgSunken: '--panel-bg-sunken', panelBorder: '--panel-border-color', panelText: '--panel-text-color', panelLabel: '--panel-label-color', toggleActiveText: '--toggle-active-text', toggleInactiveText: '--toggle-inactive-text', dialBaseStroke: '--dial-base-stroke', dialValueText: '--dial-value-text', gridLine: '--grid-line-color', dotSleep: '--dot-sleep-color', accent: '--accent-color', interactiveBg: '--interactive-bg', interactiveBgHover: '--interactive-bg-hover', interactiveBgPressed: '--interactive-bg-pressed', svgBg: '--svg-bg-color', cursorHover: '--cursor-hover-color', themeIconLightFill: '--theme-icon-light-fill', themeIconLightStroke: '--theme-icon-light-stroke', themeIconSaturatedFill: '--theme-icon-saturated-fill', themeIconSaturatedStroke: '--theme-icon-saturated-stroke', themeIconDarkFill: '--theme-icon-dark-fill', themeIconDarkStroke: '--theme-icon-dark-stroke', faintControlText: '--faint-control-text', secondaryText: '--secondary-text', masterPanelBorder: '--master-panel-border-color', masterPanelBg: '--master-panel-bg-color', };
+            const keyToVarMap = { bodyTextColor: '--body-text-color', panelBgBase: '--panel-bg-base', panelBgElevated: '--panel-bg-elevated', panelBgSunken: '--panel-bg-sunken', panelBorder: '--panel-border-color', panelText: '--panel-text-color', panelLabel: '--panel-label-color', toggleActiveText: '--toggle-active-text', toggleInactiveText: '--toggle-inactive-text', dialBaseStroke: '--dial-base-stroke', /* dialValueText: '--dial-value-text', */ gridLine: '--grid-line-color', dotSleep: '--dot-sleep-color', accent: '--accent-color', interactiveBg: '--interactive-bg', interactiveBgHover: '--interactive-bg-hover', interactiveBgPressed: '--interactive-bg-pressed', svgBg: '--svg-bg-color', cursorHover: '--cursor-hover-color', themeIconLightFill: '--theme-icon-light-fill', themeIconLightStroke: '--theme-icon-light-stroke', themeIconSaturatedFill: '--theme-icon-saturated-fill', themeIconSaturatedStroke: '--theme-icon-saturated-stroke', themeIconDarkFill: '--theme-icon-dark-fill', themeIconDarkStroke: '--theme-icon-dark-stroke', faintControlText: '--faint-control-text', secondaryText: '--secondary-text', masterPanelBorder: '--master-panel-border-color', masterPanelBg: '--master-panel-bg-color', };
+            // Note: --dial-value-text is still set in JS themes object and by this loop if present,
+            // but .dial-value-display CSS now directly uses --secondary-text.
+            // This is fine, the --dial-value-text CSS variable just won't be actively used by .dial-value-display.
             for (const key in currentThemeDef) { const valueDef = currentThemeDef[key]; const cssVarName = keyToVarMap[key]; if (cssVarName) { let cssValue = null; if (typeof valueDef === 'object' && valueDef !== null && typeof valueDef.l === 'number') { const effectiveHue = valueDef.hueSensitive ? hue : (valueDef.h ?? null); cssValue = formatOklch(valueDef, effectiveHue); } else if (typeof valueDef === 'string') { cssValue = valueDef; } if (cssValue) { setVar(cssVarName, cssValue); } } }
             for (const varName in cssVariablesToSet) { rootStyle.setProperty(varName, cssVariablesToSet[varName]); }
             if (updateDots && Array.isArray(state.dots)) { state.dots.forEach(dot => { if (dot && dot.el) { const wasHoverFill = dot.currentFill === dot.hoverFill; dot.initialFill = calculatedDotRestingColor; dot.hoverFill = calculatedDotHoverColor; if (!wasHoverFill) { setDotFill(dot, calculatedDotRestingColor, false); } } }); }
@@ -1252,9 +1386,106 @@
         // ==========================================================================
         // 10. Interaction Effect Functions (Tap Effects)
         // ==========================================================================
-        function triggerPopEffect() { if (state.masterMode === 'sleep' || !gsap || !state || !domRefs.tapButton || !domRefs.svgElement || !Array.isArray(state.dots) || state.dots.length === 0) { console.warn("triggerPopEffect: Preconditions failed."); return; } const currentThemeDef = themes[state.currentTheme]; if (!currentThemeDef?.bombRing) { console.error("Bomb ring color def not found."); return; } stopCurrentEffect();
+        function triggerPopEffect() { // Original random pop effect
+            if (state.masterMode === 'sleep' || !gsap || !state || !domRefs.tapButton || !domRefs.svgElement || !Array.isArray(state.dots) || state.dots.length === 0) { console.warn("triggerPopEffect: Preconditions failed."); return; }
+            const currentThemeDef = themes[state.currentTheme]; if (!currentThemeDef?.bombRing) { console.error("Bomb ring color def not found."); return; }
+            stopCurrentEffect();
             logMessage(getNextMessage('bomb')); // Use new message getter
-            const bombRingBase = currentThemeDef.bombRing; const popColor = formatOklch(bombRingBase, state.currentRingHue); state.currentRingHue = (state.currentRingHue + config.RING_HUE_INCREMENT) % 360; const shuffledDots = [...state.dots].sort(() => 0.5 - Math.random()); const targetCount = Math.floor(shuffledDots.length * 0.33); const targetDots = shuffledDots.slice(0, targetCount); const fragment = document.createDocumentFragment(); let animationsComplete = 0; if (targetDots.length === 0) { startCurrentEffect(); return; } targetDots.forEach((dot, index) => { if (!dot || !(dot.el instanceof SVGElement) || typeof dot.cx !== 'number' || typeof dot.cy !== 'number') { console.warn(`triggerPopEffect: Skipping invalid dot ${index}.`); animationsComplete++; return; } const ring = createSvgElement('circle', { cx: dot.cx, cy: dot.cy, r: dotRadiusInitial, stroke: popColor, 'stroke-width': config.POP_STROKE_WIDTH, class: 'pop-ring' }); fragment.appendChild(ring); gsap.fromTo(ring, { attr: { r: dotRadiusInitial }, opacity: config.POP_INITIAL_OPACITY }, { attr: { r: config.POP_FINAL_RADIUS }, opacity: 0, duration: config.POP_DURATION, ease: "power2.out", onComplete: () => { ring.remove(); animationsComplete++; if (animationsComplete === targetDots.length) { startCurrentEffect(); } } }); }); domRefs.svgElement.appendChild(fragment); }
+            const bombRingBase = currentThemeDef.bombRing; const popColor = formatOklch(bombRingBase, state.currentRingHue); state.currentRingHue = (state.currentRingHue + config.RING_HUE_INCREMENT) % 360;
+            const shuffledDots = [...state.dots].sort(() => 0.5 - Math.random());
+            const targetCount = Math.floor(shuffledDots.length * 0.33);
+            const targetDots = shuffledDots.slice(0, targetCount);
+            const fragment = document.createDocumentFragment();
+            let animationsComplete = 0;
+            if (targetDots.length === 0) { startCurrentEffect(); return; }
+            targetDots.forEach((dot, index) => {
+                if (!dot || !(dot.el instanceof SVGElement) || typeof dot.cx !== 'number' || typeof dot.cy !== 'number') {
+                    console.warn(`triggerPopEffect: Skipping invalid dot ${index}.`);
+                    animationsComplete++;
+                    return;
+                }
+                const ring = createSvgElement('circle', { cx: dot.cx, cy: dot.cy, r: dotRadiusInitial, stroke: popColor, 'stroke-width': config.POP_STROKE_WIDTH, class: 'pop-ring' });
+                fragment.appendChild(ring);
+                gsap.fromTo(ring,
+                    { attr: { r: dotRadiusInitial }, opacity: config.POP_INITIAL_OPACITY },
+                    { attr: { r: config.POP_FINAL_RADIUS }, opacity: 0, duration: config.POP_DURATION, ease: "power2.out",
+                        onComplete: () => {
+                            ring.remove();
+                            animationsComplete++;
+                            if (animationsComplete === targetDots.length) {
+                                startCurrentEffect();
+                            }
+                        }
+                    }
+                );
+            });
+            domRefs.svgElement.appendChild(fragment);
+        }
+
+        // --- NEW: Pop effect triggered at a specific point (Modified for 3 random pops) ---
+        function triggerPopEffectAtPoint(svgX, svgY) {
+            if (state.masterMode === 'sleep' || !gsap || !state || !domRefs.svgElement) { console.warn("triggerPopEffectAtPoint: Preconditions failed."); return; }
+            const currentThemeDef = themes[state.currentTheme]; if (!currentThemeDef?.bombRing) { console.error("Bomb ring color def not found for point pop."); return; }
+
+            stopCurrentEffect();
+            logMessage(getNextMessage('bomb')); // Reuse bomb message
+
+            const bombRingBase = currentThemeDef.bombRing;
+            const popColor = formatOklch(bombRingBase, state.currentRingHue);
+            state.currentRingHue = (state.currentRingHue + config.RING_HUE_INCREMENT) % 360;
+
+            const popAreaRadius = config.POP_FINAL_RADIUS; // Radius of the area to generate pops within
+            const numPops = 3; // Generate exactly 3 pops
+            let animationsComplete = 0;
+
+            const fragment = document.createDocumentFragment();
+
+            for (let i = 0; i < numPops; i++) {
+                const randomAngle = Math.random() * 2 * Math.PI;
+                // Use sqrt of random number for uniform distribution within the circle area
+                const randomRadiusMultiplier = Math.sqrt(Math.random());
+                const randomDist = randomRadiusMultiplier * popAreaRadius;
+
+                // Calculate random coordinates within the circle
+                const randX = svgX + randomDist * Math.cos(randomAngle);
+                const randY = svgY + randomDist * Math.sin(randomAngle);
+
+                const ring = createSvgElement('circle', {
+                    cx: randX, // Start ring at the random point
+                    cy: randY,
+                    r: dotRadiusInitial, // Start small
+                    stroke: popColor,
+                    'stroke-width': config.POP_STROKE_WIDTH,
+                    class: 'pop-ring'
+                });
+                fragment.appendChild(ring);
+
+                gsap.fromTo(ring,
+                    { attr: { r: dotRadiusInitial }, opacity: config.POP_INITIAL_OPACITY },
+                    {
+                        attr: { r: config.POP_FINAL_RADIUS }, // Expand to full pop radius
+                        opacity: 0,
+                        duration: config.POP_DURATION,
+                        ease: "power2.out",
+                        onComplete: () => {
+                            ring.remove();
+                            animationsComplete++;
+                            if (animationsComplete === numPops) {
+                                startCurrentEffect(); // Restart background effect only when all pops are done
+                            }
+                        }
+                    }
+                );
+            }
+
+            domRefs.svgElement.appendChild(fragment);
+
+            // Handle case where numPops might be 0 (though it's fixed at 3 here)
+            if (numPops === 0) {
+                startCurrentEffect();
+            }
+        }
+        // --- END NEW Pop effect ---
         function triggerShakeEffect() { if (state.masterMode === 'sleep' || !gsap || !Array.isArray(state.dots) || state.dots.length === 0) { console.warn("triggerShakeEffect: Preconditions failed."); return; }
             logMessage(getNextMessage('shake')); // Use new message getter
             stopCurrentEffect(); const shakeAmount = config.SHAKE_AMOUNT; const partDuration = config.SHAKE_DURATION / 3; let timelinesComplete = 0; const validDots = state.dots.filter(dot => dot && dot.el instanceof SVGElement && typeof dot.cx === 'number' && typeof dot.cy === 'number'); if (validDots.length === 0) { startCurrentEffect(); return; } validDots.forEach((dot) => { gsap.killTweensOf(dot.el, "attr"); const tl = gsap.timeline({ delay: gsap.utils.random(0, config.SHAKE_DELAY_MAX), onComplete: () => { timelinesComplete++; if (timelinesComplete === validDots.length) { startCurrentEffect(); } } }); const randX1 = dot.cx + gsap.utils.random(-shakeAmount, shakeAmount); const randY1 = dot.cy + gsap.utils.random(-shakeAmount, shakeAmount); const randX2 = dot.cx + gsap.utils.random(-shakeAmount, shakeAmount); const randY2 = dot.cy + gsap.utils.random(-shakeAmount, shakeAmount); tl.to(dot.el, { attr: { cx: randX1, cy: randY1 }, duration: partDuration, ease: "power1.inOut" }).to(dot.el, { attr: { cx: randX2, cy: randY2 }, duration: partDuration, ease: "power1.inOut" }).to(dot.el, { attr: { cx: dot.cx, cy: dot.cy }, duration: partDuration, ease: "power1.inOut" }); }); }
@@ -1273,6 +1504,23 @@
         function handleTouchStart(e) { if (state.isDraggingDial || state.masterMode === 'sleep' || !e.touches || e.touches.length === 0) return; e.preventDefault(); state.isDraggingSvg = true; state.isMouseOverSvg = true; document.addEventListener('touchmove', handleTouchMove, { passive: false }); document.addEventListener('touchend', handleTouchEnd); document.addEventListener('touchcancel', handleTouchEnd); domRefs.svgElement.classList.add('mouse-over'); const touch = e.touches[0]; const svgTouchPoint = getSvgCoordinates(touch.clientX, touch.clientY); if (svgTouchPoint) { applyHoverEffect(svgTouchPoint.x, svgTouchPoint.y); } }
         function handleTouchMove(e) { if (!state.isDraggingSvg || state.isDraggingDial || state.masterMode === 'sleep' || !e.touches || e.touches.length === 0) return; e.preventDefault(); const touch = e.touches[0]; const svgTouchPoint = getSvgCoordinates(touch.clientX, touch.clientY); if (svgTouchPoint) { applyHoverEffect(svgTouchPoint.x, svgTouchPoint.y); } }
         function handleTouchEnd(e) { if (!state.isDraggingSvg) return; state.isDraggingSvg = false; state.isMouseOverSvg = false; document.removeEventListener('touchmove', handleTouchMove); document.removeEventListener('touchend', handleTouchEnd); document.removeEventListener('touchcancel', handleTouchEnd); domRefs.svgElement.classList.remove('mouse-over'); if (state.masterMode !== 'sleep') { if (!gsap || !Array.isArray(state.dots)) return; state.dots.forEach(dot => { if (dot?.el instanceof SVGElement && dot.initialFill) { resetDotToInitialVisuals(dot, true); } }); } }
+        // --- NEW: SVG Click Handler ---
+        function handleSvgClick(event) {
+            // Only trigger on non-touch events (mouse clicks) and when active
+            if (state.masterMode === 'sleep' || event.pointerType !== 'mouse') {
+                return;
+            }
+            // Prevent triggering if dragging a dial
+            if (state.isDraggingDial) {
+                return;
+            }
+
+            const svgClickPoint = getSvgCoordinates(event.clientX, event.clientY);
+            if (svgClickPoint) {
+                triggerPopEffectAtPoint(svgClickPoint.x, svgClickPoint.y);
+            }
+        }
+        // --- END NEW SVG Click Handler ---
 
         // ==========================================================================
         // 12. Master Mode Functions (Sleep/Activated)
@@ -1434,13 +1682,13 @@
                 if (!isStillOverContainer) {
                     const iconDefaultGrade = getCssVarAsNumber('--slider-thumb-icon-grad') || -25;
                     animateHueIconGrade(iconDefaultGrade);
-                    gsap.to(domRefs.hueTrack, {
-                    '--slider-mask-height-factor': 0,
-                    boxShadow: 'var(--slider-track-inset-shadow)',
-                    duration: trackEnterDuration,
-                    ease: 'sine.out',
+                    gsap.to(domRefs.hueTrack, { // This was missing trackEnterDuration, fixed
+                    '--slider-mask-height-factor': 1, // Should be 1 to restore mask
+                    boxShadow: 'var(--slider-track-inset-shadow)', // Restore shadow if needed
+                    duration: getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.1, // Use leave duration
+                    ease: getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-track-leave-ease').trim() || 'power2.out', // Use leave ease
                     overwrite: true
-                });     
+                });
                 if (domRefs.hueHoverLine) {
                         gsap.to(domRefs.hueHoverLine, { opacity: 0, duration: 0.1, overwrite: true });
                     }
@@ -1530,31 +1778,34 @@
             // --- Event Listeners ---
             domRefs.hueThumbContainer.addEventListener('mousedown', handleHueSliderStart);
             domRefs.hueThumbContainer.addEventListener('touchstart', handleHueSliderStart, { passive: false });
-            domRefs.hueTrack.addEventListener('mousedown', handleHueSliderStart);
-            domRefs.hueTrack.addEventListener('touchstart', handleHueSliderStart, { passive: false });
+            domRefs.hueTrack.addEventListener('mousedown', handleHueSliderStart); // Allow click on track to start drag/jump
+            domRefs.hueTrack.addEventListener('touchstart', handleHueSliderStart, { passive: false }); // Allow tap on track
 
-            // Container Hover & Click
+            // Container Hover & Click (for hover line and click-to-set if not on thumb/track)
             domRefs.hueSliderContainer.addEventListener('mouseenter', handleHueContainerHover);
             domRefs.hueSliderContainer.addEventListener('mousemove', handleHueContainerMove);
             domRefs.hueSliderContainer.addEventListener('mouseleave', handleHueContainerLeave);
-            domRefs.hueSliderContainer.addEventListener('mousedown', handleHueContainerClick);
+            domRefs.hueSliderContainer.addEventListener('mousedown', handleHueContainerClick); // Handles clicks in padding
             domRefs.hueSliderContainer.addEventListener('touchstart', handleHueContainerClick, { passive: true });
+
 
             // Icon/Track Hover Animations
             const iconDefaultGrade = getCssVarAsNumber('--slider-thumb-icon-grad') || -25;
             const iconHoverGrade = 200;
             const trackEnterDuration = getCssVarAsNumber('--gsap-slider-track-enter-duration') || 0.1;
-            const trackLeaveDuration = getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.1; // Use faster leave
+            const trackLeaveDuration = getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.1;
             const trackLeaveEase = getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-track-leave-ease').trim() || 'power2.out';
+            const trackEnterEase = getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-track-leave-ease').trim() || 'power2.out'; // Assuming same ease for enter for now
+
 
             domRefs.hueSliderContainer.addEventListener('mouseenter', () => {
                 if (state.masterMode !== 'sleep' && !state.isDraggingHueSlider) {
                     animateHueIconGrade(iconHoverGrade);
                     gsap.to(domRefs.hueTrack, {
-                        boxShadow: 'none',
-                        '--slider-mask-height-factor': 0,
+                        boxShadow: 'none', // Remove inset shadow on hover
+                        '--slider-mask-height-factor': 0, // Expand track
                         duration: trackEnterDuration,
-                        ease: 'trackLeaveEase',
+                        ease: trackEnterEase, // Use enter ease
                         overwrite: true
                     });
                     // handleHueContainerHover shows the line
@@ -1564,7 +1815,8 @@
                 if (state.masterMode !== 'sleep' && !state.isDraggingHueSlider) {
                    animateHueIconGrade(iconDefaultGrade);
                    gsap.to(domRefs.hueTrack, {
-                       '--slider-mask-height-factor': 1,
+                       '--slider-mask-height-factor': 1, // Restore mask
+                       boxShadow: 'var(--slider-track-inset-shadow)', // Restore inset shadow
                        duration: trackLeaveDuration,
                        ease: trackLeaveEase,
                        overwrite: true
@@ -1584,7 +1836,7 @@
         // 15. Event Listener Setup
         // ==========================================================================
         function setupEventListeners() {
-            const requiredRefs = ['effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'svgElement', 'masterToggle', 'themeToggle', /*'hueSliderContainer',*/ 'masterTitle', 'consolePanel', 'masterPanelWrapper', 'footerCredit']; // Removed hueSliderContainer as its listeners are in its init
+            const requiredRefs = ['effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'svgElement', 'masterToggle', 'themeToggle', /*'hueSliderContainer',*/ 'masterTitle', 'consolePanel', 'masterPanelWrapper', 'footerContainer', 'footerCredit']; // Added footerContainer
             for (const refName of requiredRefs) { if (!domRefs[refName]) { throw new Error(`Listener setup fail: Missing '${refName}'!`); } }
 
             // --- Dial Drag Logic ---
@@ -1636,12 +1888,17 @@
             domRefs.effectTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.effectType || button.classList.contains('active')) return; const newValue = button.dataset.effectType; initializeToggle(domRefs.effectTypeToggle, newValue, 'effectType'); logMessage(getNextMessage(newValue === 'wave' ? 'effectWave' : 'effectSparkle')); setActiveEffect(newValue); });
             domRefs.hoverTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.hoverType || button.classList.contains('active')) return; const newValue = button.dataset.hoverType; initializeToggle(domRefs.hoverTypeToggle, newValue, 'hoverType'); logMessage(getNextMessage(newValue === 'attract' ? 'hoverAttract' : 'hoverRepel')); state.activeHoverMode = newValue; });
 
-            domRefs.tapButton.addEventListener('click', triggerPopEffect);
+            domRefs.tapButton.addEventListener('click', triggerPopEffect); // Original random pop
             domRefs.jiggleButton.addEventListener('click', triggerShakeEffect);
             domRefs.waveTapButton.addEventListener('click', triggerPulseEffect);
+
+            // SVG Listeners
             domRefs.svgElement.addEventListener('mouseenter', handleMouseEnter);
             domRefs.svgElement.addEventListener('mouseleave', handleMouseLeave);
             domRefs.svgElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+            domRefs.svgElement.addEventListener('click', handleSvgClick); // NEW: Listener for click-to-pop
+
+            // Window Listeners
             window.addEventListener('resize', () => { clearTimeout(state.resizeTimer); state.resizeTimer = setTimeout(() => { setupSvg(); state.hueSliderTrackRect = null; /* Reset slider rect too */ }, 250); });
             window.addEventListener('orientationchange', () => { state.hueSliderTrackRect = null; });
 
@@ -1651,7 +1908,7 @@
         // 16. Initialization Execution
         // ==========================================================================
         function main() {
-            console.log("Initializing Application (v99 Refined v18 - Enhanced Slider)...");
+            console.log("Initializing Application (v99 Refined v19 - Click Pop)...");
             try {
                 if (typeof gsap === 'undefined') throw new Error("GSAP library is not loaded!");
                 if (!gsap.plugins.text) throw new Error("GSAP TextPlugin is not loaded!"); // Check TextPlugin
