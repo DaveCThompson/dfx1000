@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DFX Console - v99 (Refined v18 - New Logo)</title> <!-- Title Updated -->
-    <!-- GSAP Core ONLY -->
+    <title>DFX Console - v99 (Refined v18 - Enhanced Slider)</title> <!-- Title Updated -->
+    <!-- GSAP Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- GSAP TextPlugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
     <!-- Material Symbols -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <!-- Fonts -->
@@ -80,7 +82,7 @@
      --gsap-slider-icon-ease: 'power1.out';
      /* NEW: GSAP durations for track height */
      --gsap-slider-track-enter-duration: 0.1s;
-     --gsap-slider-track-leave-duration: 0.1s;
+     --gsap-slider-track-leave-duration: 0.1s; /* Made faster */
      --gsap-slider-track-leave-ease: 'power2.out';
 
 
@@ -123,7 +125,7 @@
      --dot-hover-color: oklch(0.60 0.18 255);
      --dot-sleep-color: oklch(0.78 0.03 270);
      --grid-line-color: oklch(0.5 0.03 255 / 0.30);
-     --cursor-hover-color: oklch(0.70 0.05 255);
+     --cursor-hover-color: oklch(0.70 0.05 255); /* Used for SVG hover circle AND slider hover line */
      /* --- Slider Track Gradient (Using DFX Variable) --- */
      --slider-track-gradient: linear-gradient(90deg, grey, lightgrey);
      --theme-icon-light-fill: oklch(1 0 0);
@@ -230,23 +232,18 @@
  }
  /* UPDATED: Master Title (SVG Logo) */
  #master-title {
-    /* REMOVED: color: var(--secondary-text); - Color is now defined in SVG */
     margin-bottom: 0;
-    /* REMOVED: transition: color ... - No longer needed */
     cursor: default;
     position: relative;
-    /* Set height for the container to control SVG size */
     height: var(--logo-height);
-    display: flex; /* Added for potential centering if needed */
-    align-items: center; /* Added for potential centering if needed */
-    justify-content: center; /* Added for potential centering if needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
  }
  #master-title svg {
-    /* Size the SVG */
-    height: 100%; /* Fill the container height */
-    width: auto; /* Maintain aspect ratio */
-    /* Fill is controlled by attributes in the SVG itself */
-    display: block; /* Remove extra space below inline SVG */
+    height: 100%;
+    width: auto;
+    display: block;
  }
 
 
@@ -411,7 +408,7 @@
     display: flex;
     align-items: center; /* Vertically center the track */
     transition: background-color var(--transition-duration-slow) var(--transition-ease), opacity var(--transition-duration-slow) var(--transition-ease);
-    /* REMOVED min-height calculation - relies on parent div height */
+    cursor: pointer; /* Make the whole container clickable */
  }
 
  .hue-slider-track {
@@ -419,9 +416,8 @@
     height: var(--slider-track-height-hover); /* Use DFX variable (6px) */
     background: var(--slider-track-gradient); /* Use DFX variable */
     border-radius: var(--slider-track-radius); /* Use DFX variable (6px) */
-    position: relative;
-    cursor: pointer;
-    box-shadow: var(--slider-track-inset-shadow); /* Apply the inset shadow */
+    position: relative; /* Ensure positioning context for children */
+    cursor: inherit; /* Inherit cursor from container */
     transition: box-shadow var(--transition-duration-medium) var(--transition-ease); /* Transition shadow if needed */
     /* NEW: Define the mask height factor variable */
     --slider-mask-height-factor: 1;
@@ -450,7 +446,22 @@
     bottom: 0;
     border-radius: 0 0 var(--slider-track-radius) var(--slider-track-radius); /* Use DFX variable */
  }
- /* REMOVED: CSS Hover state for masks (now handled by GSAP) */
+
+ /* NEW: Styling for the vertical hover line */
+ .hue-slider-hover-line {
+    position: absolute;
+    top: 0;
+    left: 50%; /* Initial position, will be updated by JS */
+    width: var(--line-width-thick, 2px); /* Use existing variable or fallback */
+    height: 100%;
+    background-color: var(--master-panel-bg-color); /* Use SVG hover color */
+    opacity: 0; /* Initially hidden */
+    pointer-events: none; /* Doesn't interfere with clicks */
+    /* Use GSAP for transitions, but add fallback */
+    transition: opacity var(--transition-duration-fast) var(--transition-ease),
+                background-color var(--transition-duration-slow) var(--transition-ease);
+    z-index: 0; /* Behind the thumb (thumb is z-index 2) */
+ }
 
 
  /* Thumb Container: Positioned relative to the fixed-height track */
@@ -462,7 +473,7 @@
     width: var(--slider-thumb-width); /* Use DFX variable (20px) */
     height: var(--slider-thumb-height); /* Use DFX variable (32px) */
     cursor: grab;
-    z-index: 2; /* Above track and masks */
+    z-index: 2; /* Above track, masks, and hover line */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -599,7 +610,7 @@
  body.app-sleeping #master-toggle { opacity: 1; pointer-events: auto; }
  body.app-sleeping #master-toggle button { opacity: 1; pointer-events: auto; cursor: pointer; }
  /* Ensure new slider elements are also dimmed/disabled */
- body.app-sleeping #hue-slider-container { opacity: 0.4; pointer-events: none; }
+ body.app-sleeping #hue-slider-container { opacity: 0.4; pointer-events: none; cursor: default !important; } /* Apply cursor default directly */
  body.app-sleeping .hue-slider-track,
  body.app-sleeping .hue-slider-thumb-container { cursor: default !important; }
  body.app-sleeping .dimmable-content :is(button, input[type=range], .dial-svg) { cursor: default !important; }
@@ -642,7 +653,6 @@
       /* Mobile Slider Adjustments */
       #hue-slider-container {
           padding: 0.375rem 0.5rem; /* Keep vertical, reduce horizontal */
-          /* REMOVED min-height override - relies on parent height */
       }
       .hue-slider-track::before,
       .hue-slider-track::after {
@@ -768,6 +778,9 @@
                              <div id="hue-slider-container" class="dimmable-content">
                                  <!-- GSAP Slider HTML Structure (Track is centered via flex) -->
                                  <div class="hue-slider-track" id="hue-track">
+                                     <!-- NEW: Vertical Hover Line -->
+                                     <div class="hue-slider-hover-line" id="hue-hover-line"></div>
+                                     <!-- END NEW -->
                                      <div class="hue-slider-thumb-container" id="hue-thumb-container">
                                          <div class="hue-slider-thumb" id="hue-thumb">
                                              <span class="material-symbols-outlined thumb-icon" id="thumb-icon">drag_handle</span>
@@ -817,8 +830,7 @@
                 </div>
 
                 <!-- Footer Credit Section -->
-                <div id="footer-credit">Made with pixels, code, and coffee.
-© Dave Thompson Design</div>
+                <div id="footer-credit">Made with pixels. © Dave Thompson Design</div>
 
             </div> <!-- END control-console-frame -->
         </div> <!-- END master-panel-wrapper -->
@@ -1017,31 +1029,105 @@
         function resetDotToInitialVisuals(dot, animate = true, duration = config.ANIMATION_DURATION_LEAVE, ease = 'power2.out') { if (!dot || !dot.el || typeof dot.cx !== 'number' || typeof dot.cy !== 'number' || !dot.initialFill) { console.warn("resetDotToInitialVisuals: Invalid dot"); return; } const targetState = { attr: { cx: dot.cx, cy: dot.cy }, fill: dot.initialFill }; if (animate) { gsap.to(dot.el, { attr: targetState.attr, fill: targetState.fill, duration: duration, ease: ease, overwrite: "auto", onStart: () => { if (dot) dot.currentFill = dot.initialFill; } }); } else { gsap.set(dot.el, targetState); dot.currentFill = dot.initialFill; } }
         function updateMessageBoxScroll() { const container = domRefs.consolePanel; if (container) { container.scrollTop = container.scrollHeight; } }
         function logMessage(newMessage) { if (!domRefs.messageBoxContent) return; state.messageLog.push(`> ${newMessage}`); if (state.messageLog.length > 3) { state.messageLog.shift(); } updateMessageBox(); }
-        function updateMessageBox() { if (domRefs.messageBoxContent) { domRefs.messageBoxContent.innerHTML = ''; state.messageLog.forEach((line, index) => { const lineDiv = document.createElement('div'); lineDiv.textContent = line; const age = state.messageLog.length - 1 - index; lineDiv.style.opacity = age === 0 ? 1 : (age === 1 ? 0.7 : 0.4); domRefs.messageBoxContent.appendChild(lineDiv); }); updateMessageBoxScroll(); } }
+        // --- UPDATED: updateMessageBox with Typing Effect ---
+        function updateMessageBox() {
+            if (!domRefs.messageBoxContent) return;
+
+            const typingSpeedFactor = 0.015; // Seconds per character (lower is faster)
+            const maxTypingDuration = 1.5; // Maximum time for any message to type out
+
+            if (domRefs.messageBoxContent.lastChild) {
+                gsap.killTweensOf(domRefs.messageBoxContent.lastChild, "text");
+            }
+
+            const fragment = document.createDocumentFragment();
+            let lastLineDiv = null;
+
+            state.messageLog.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                const isLastMessage = index === state.messageLog.length - 1;
+                const age = state.messageLog.length - 1 - index;
+                lineDiv.style.opacity = age === 0 ? 1 : (age === 1 ? 0.7 : 0.4);
+
+                if (isLastMessage) {
+                    lineDiv.textContent = '';
+                    lastLineDiv = lineDiv;
+                } else {
+                    lineDiv.textContent = line;
+                }
+                fragment.appendChild(lineDiv);
+            });
+
+            domRefs.messageBoxContent.innerHTML = '';
+            domRefs.messageBoxContent.appendChild(fragment);
+
+            if (lastLineDiv && state.messageLog.length > 0) {
+                const lastLineText = state.messageLog[state.messageLog.length - 1];
+                const calculatedDuration = Math.min(lastLineText.length * typingSpeedFactor, maxTypingDuration);
+
+                gsap.to(lastLineDiv, {
+                    text: { value: lastLineText, delimiter: "" },
+                    duration: calculatedDuration,
+                    ease: "none",
+                    onUpdate: updateMessageBoxScroll,
+                    onComplete: updateMessageBoxScroll
+                });
+            } else {
+                 updateMessageBoxScroll();
+            }
+        }
         // --- Helper to get CSS variable (numeric) ---
         const getCssVarAsNumber = (varName) => {
             try {
                 return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(varName).trim());
             } catch (e) {
                 console.warn(`Could not parse CSS variable ${varName} as number.`);
-                return 0; // Return a default or handle error appropriately
+                return 0;
             }
         };
-        // --- Helper to get Hue Color Category ---
+        // --- Helper to get Hue Color Category (REVISED) ---
         function getHueCategory(hueValue) {
-            const hue = (hueValue % 360 + 360) % 360; // Normalize hue to 0-359.99
+            const hue = (hueValue % 360 + 360) % 360; // Normalize hue to 0-359.99...
+
             for (const color in config.HUE_RANGES) {
                 const range = config.HUE_RANGES[color];
-                // Special case for red spanning 0/360
-                if (range.key === 'hueRed' && (hue >= range.min && hue < range.max || hue >= (range.min + 360) % 360)) {
-                   return range.key;
-                }
-                if (hue >= range.min && hue < range.max) {
+                 if (hue >= range.min && hue < range.max) {
                     return range.key;
                 }
             }
-            return null; // Should not happen with full range defined
+
+            if (Math.abs(hue - 360) < config.EPSILON || Math.abs(hue - 0) < config.EPSILON) {
+                 if (config.HUE_RANGES.red && config.HUE_RANGES.red.key) {
+                    return config.HUE_RANGES.red.key;
+                 }
+            }
+
+            console.warn(`getHueCategory: Hue ${hue.toFixed(2)} did not fall into any defined range.`);
+            let closestKey = null;
+            let minDist = 360;
+            for (const color in config.HUE_RANGES) {
+                 const range = config.HUE_RANGES[color];
+                 const dist = Math.min(Math.abs(hue - range.min), Math.abs(hue - range.max));
+                 if (dist < minDist) {
+                     minDist = dist;
+                     closestKey = range.key;
+                 }
+            }
+            return closestKey;
         }
+
+        // --- NEW: Refactored Hue Change Logging ---
+        function logHueChange(initialHue, finalHue) {
+            const hueDiff = Math.abs(finalHue - initialHue);
+            // Log message only if hue changed significantly OR color category changed
+            if (hueDiff >= config.HUE_CHANGE_THRESHOLD || getHueCategory(finalHue) !== getHueCategory(initialHue)) {
+                const colorCategoryKey = getHueCategory(finalHue);
+                if (colorCategoryKey) {
+                    logMessage(getNextMessage(colorCategoryKey));
+                }
+            }
+        }
+
 
         // ==========================================================================
         // 6. Data Definitions (Requires Helpers)
@@ -1066,8 +1152,9 @@
                  hueThumbContainer: document.getElementById('hue-thumb-container'),
                  hueThumb: document.getElementById('hue-thumb'),
                  thumbIcon: document.getElementById('thumb-icon'),
+                 hueHoverLine: document.getElementById('hue-hover-line'), // NEW
                  // --- End New Slider Refs ---
-                 masterTitle: document.getElementById('master-title'), // Kept ref
+                 masterTitle: document.getElementById('master-title'),
                  svgElement: document.getElementById('interactive-svg'),
                  svgContainer: document.getElementById('svg-container'),
                  displaySection: document.getElementById('display-section'),
@@ -1086,7 +1173,7 @@
              document.querySelectorAll('[data-dial-id]').forEach(el => { refs[`dial_${el.dataset.dialId}`] = el; });
              document.querySelectorAll('[data-value-id]').forEach(el => { refs[`value_${el.dataset.valueId}`] = el; });
              document.querySelectorAll('.dial-indicator-group').forEach(el => { const dial = el.closest('.dial-svg'); if (dial && dial.dataset.dialId) { refs[`indicator_${dial.dataset.dialId}`] = el; } });
-             const criticalKeys = ['masterPanelWrapper', 'svgElement', 'svgContainer', 'displaySection', 'masterToggle', 'themeToggle', 'hueSliderContainer', 'hueTrack', 'hueThumbContainer', 'hueThumb', 'thumbIcon', 'masterTitle', 'messageBoxContent', 'consolePanel', 'messageBoxContainer', 'waveControls', 'sparkleControls', 'effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'footerCredit'];
+             const criticalKeys = ['masterPanelWrapper', 'svgElement', 'svgContainer', 'displaySection', 'masterToggle', 'themeToggle', 'hueSliderContainer', 'hueTrack', 'hueThumbContainer', 'hueThumb', 'thumbIcon', 'hueHoverLine', 'masterTitle', 'messageBoxContent', 'consolePanel', 'messageBoxContainer', 'waveControls', 'sparkleControls', 'effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'footerCredit'];
              let refsOk = true;
              for (const key of criticalKeys) { if (key && (!refs[key] || (refs[key] instanceof NodeList && refs[key].length === 0))) { console.error(`DOM Ref Error: Critical element '${key}' not found or empty.`); refsOk = false; } }
              if (typeof dialConfigs !== 'undefined') {
@@ -1103,16 +1190,15 @@
         function initializeDial(dialId) { const dConfig = dialConfigs[dialId]; const dialEl = domRefs[`dial_${dialId}`]; const indicatorEl = domRefs[`indicator_${dialId}`]; const valueEl = domRefs[`value_${dialId}`]; if (!dConfig || !dialEl || !indicatorEl || !valueEl) { console.warn(`initializeDial: Missing config/elements for dial '${dialId}'.`); if (valueEl) valueEl.textContent = 'Err'; return; } createTicks(dialEl, dConfig.fullRange); const stateVal = state[dConfig.stateProp]; if (typeof stateVal !== 'number' || typeof dConfig.displayMin !== 'number' || typeof dConfig.displayMax !== 'number') { console.warn(`initializeDial: Invalid state/config value for dial '${dialId}'.`); valueEl.textContent = 'Err'; return; } dialEl.dataset.dialId = dialId; dialEl.dataset.min = dConfig.displayMin; dialEl.dataset.max = dConfig.displayMax; dialEl.dataset.format = (dConfig.formatFn === formatFloat) ? 'float' : 'int'; const displayValue = mapRange(stateVal, dConfig.internalMin, dConfig.internalMax, dConfig.displayMin, dConfig.displayMax); const initialAngle = dConfig.fullRange ? valueToAngle360(displayValue, dConfig.displayMin, dConfig.displayMax) : valueToAngle(displayValue, dConfig.displayMin, dConfig.displayMax); updateDialVisuals(dialEl, indicatorEl, valueEl, initialAngle, dConfig.formatFn); }
         function initializeToggle(toggleContainerRef, activeValue, dataAttributeKey) { if (!toggleContainerRef) { console.warn(`initializeToggle: Invalid container ref for key '${dataAttributeKey}'.`); return; } const buttons = toggleContainerRef.querySelectorAll('button'); buttons.forEach(btn => { btn.classList.toggle('active', btn.dataset[dataAttributeKey] === activeValue); }); }
         function initializeControls() {
-            if (!domRefs.effectTypeToggle || !domRefs.hoverTypeToggle || !domRefs.themeToggle || !domRefs.hueSliderContainer) {
-                console.error("initializeControls: Missing toggle/slider refs.");
+            if (!domRefs.effectTypeToggle || !domRefs.hoverTypeToggle || !domRefs.themeToggle) {
+                console.error("initializeControls: Missing toggle refs.");
                 return;
             }
             Object.keys(dialConfigs).forEach(dialId => { initializeDial(dialId); });
             initializeToggle(domRefs.effectTypeToggle, state.activeEffect, 'effectType');
             initializeToggle(domRefs.hoverTypeToggle, state.activeHoverMode, 'hoverType');
             initializeToggle(domRefs.themeToggle, state.currentTheme, 'theme');
-            // Initialize the NEW Hue Slider
-            initializeHueSlider();
+            // Hue Slider is initialized separately in initializeHueSlider()
             applyTheme(state.currentTheme, false); // Apply theme *after* slider init to get correct colors
             updateEffectDialsVisibility();
             const hoverPowerLabel = document.getElementById('hover-power-label');
@@ -1177,7 +1263,7 @@
             stopCurrentEffect(); const dotElements = state.dots.map(d => d.el).filter(el => el instanceof SVGElement); if (dotElements.length === 0) { startCurrentEffect(); return; } const centerX = geometry.gridCenter.x; const centerY = geometry.gridCenter.y; let maxDist = 0; state.dots.forEach(dot => { const d = distance(centerX, centerY, dot.cx, dot.cy); if (d > maxDist) maxDist = d; }); maxDist = Math.max(maxDist, config.EPSILON); gsap.killTweensOf(dotElements, "attr"); gsap.to(dotElements, { duration: config.PULSE_DURATION / 2, attr: { r: (i, target) => (state.dots.find(d => d.el === target)?.initialR ?? dotRadiusInitial) + config.PULSE_MAX_RADIUS_INCREASE, cy: (i, target) => (state.dots.find(d => d.el === target)?.cy ?? 0) - config.PULSE_MAX_Y_DISPLACEMENT }, ease: "power1.out", yoyo: true, repeat: 1, stagger: (index, target) => { const dotData = state.dots.find(d => d.el === target); if (!dotData) return 0; const dist = distance(centerX, centerY, dotData.cx, dotData.cy); return (dist / maxDist) * config.PULSE_TOTAL_STAGGER; }, onComplete: () => { state.dots.forEach(dot => { if(dot) resetDotToInitialVisuals(dot, false); }); startCurrentEffect(); } }); }
 
         // ==========================================================================
-        // 11. Mouse/Touch Handling Functions (Hover Effects)
+        // 11. Mouse/Touch Handling Functions (Hover Effects - SVG Area)
         // ==========================================================================
         function applyHoverEffect(svgX, svgY) { if (!gsap || !Array.isArray(state.dots) || state.dots.length === 0 || !geometry.scaleFactor || geometry.scaleFactor <= 0) return; const hoverRadiusSVG = state.hoverFalloff / geometry.scaleFactor; const visualCursorRadiusSVG = hoverRadiusSVG / 2; if (domRefs.cursorGravityCircle) { gsap.set(domRefs.cursorGravityCircle, { attr: { cx: svgX, cy: svgY, r: visualCursorRadiusSVG } }); } state.dots.forEach(dot => { if (!dot || !dot.el || !dot.initialFill || !dot.hoverFill) return; const dx = svgX - dot.cx; const dy = svgY - dot.cy; const dist = Math.sqrt(dx * dx + dy * dy); const linearIntensity = clamp(1 - (dist / hoverRadiusSVG), 0, 1); const targetColor = linearIntensity > 0.01 ? dot.hoverFill : dot.initialFill; if (dot.currentFill !== targetColor) { setDotFill(dot, targetColor, false); } const shiftIntensity = linearIntensity; let targetCx = dot.cx; let targetCy = dot.cy; if (shiftIntensity > 0 && dist > config.EPSILON) { const powerInternal = state.hoverPower; const powerSVG = powerInternal / geometry.scaleFactor; const directionMultiplier = state.activeHoverMode === 'attract' ? 1 : -1; const shiftAmount = powerSVG * shiftIntensity; targetCx += (dx / dist) * shiftAmount * directionMultiplier; targetCy += (dy / dist) * shiftAmount * directionMultiplier; } gsap.to(dot.el, { attr: { cx: targetCx, cy: targetCy }, duration: config.ANIMATION_DURATION_HOVER_POS, ease: 'power1.out', overwrite: "auto" }); }); }
         function getSvgCoordinates(screenX, screenY) { if (!geometry.ctmInverse && domRefs.svgElement) { try { const ctm = domRefs.svgElement.getScreenCTM(); if (ctm) geometry.ctmInverse = ctm.inverse(); } catch (e) { console.error("Error getting/inverting CTM:", e); return null; } } if (!geometry.ctmInverse) { console.error("getSvgCoordinates: CTM inverse unavailable."); return null; } if (!domRefs.svgElement) { console.error("getSvgCoordinates: SVG Element missing."); return null; } const pt = domRefs.svgElement.createSVGPoint(); pt.x = screenX; pt.y = screenY; try { return pt.matrixTransform(geometry.ctmInverse); } catch (e) { console.error("Error transforming coordinates:", e); return null; } }
@@ -1193,26 +1279,24 @@
         // ==========================================================================
         function setSleepDimmedState(isDimmed) {
             document.body.classList.toggle('app-sleeping', isDimmed);
-            const allControls = document.querySelectorAll('#control-console-frame button, #control-console-frame input[type=range], #control-console-frame .hue-slider-track, #control-console-frame .hue-slider-thumb-container'); // Include new slider parts
+            const allControls = document.querySelectorAll('#control-console-frame button, #control-console-frame input[type=range], #control-console-frame .hue-slider-track, #control-console-frame .hue-slider-thumb-container');
             allControls.forEach(ctrl => {
                 const isMasterOnButton = ctrl.closest('#master-toggle') && ctrl.dataset.masterMode === 'activated';
-                // Disable buttons/inputs directly
                 if (ctrl.tagName === 'BUTTON' || ctrl.tagName === 'INPUT') {
                     ctrl.disabled = isDimmed && !isMasterOnButton;
                 }
-                // For slider parts, rely on the .app-sleeping .dimmable-content CSS rule and JS checks
             });
         }
         function enterSleepMode() {
             if (state.masterMode === 'sleep') return;
             state.masterMode = 'sleep';
-            logMessage(getNextMessage('sleep')); // Use new message getter
+            logMessage(getNextMessage('sleep'));
             stopCurrentEffect(); if (state.isMouseOverSvg) { handleMouseLeave(); } setSleepDimmedState(true); if(domRefs.svgElement) domRefs.svgElement.classList.remove('mouse-over'); if (gsap && state.dots.length > 0) { const sleepColor = getComputedStyle(document.documentElement).getPropertyValue('--dot-sleep-color').trim() || '#B3BFCD'; const dotElementsToSleep = state.dots.map(d => d?.el).filter(el => el instanceof SVGElement); if (dotElementsToSleep.length > 0) { gsap.to(dotElementsToSleep, { duration: gsap.utils.random(0.5, 0.8), delay: gsap.utils.random(0, 0.6), ease: 'power2.inOut', attr: { r: 1, cy: geometry.gridCenter.y }, fill: sleepColor, overwrite: true, stagger: 0.002, onStart: (dotIndex) => { const targetElement = dotElementsToSleep[dotIndex]; const dot = state.dots.find(d => d.el === targetElement); if (dot) dot.currentFill = sleepColor; } }); } }
         }
         function enterActivatedMode() {
             if (state.masterMode === 'activated') return;
             state.masterMode = 'activated';
-            logMessage(getNextMessage('activate')); // Use new message getter
+            logMessage(getNextMessage('activate'));
             setSleepDimmedState(false); applyTheme(state.currentTheme, false); startIntroAnimation();
         }
 
@@ -1228,9 +1312,24 @@
         function setActiveEffect(newEffect) { if (!newEffect || (newEffect !== 'wave' && newEffect !== 'sparkle') || (newEffect === state.activeEffect)) return; stopCurrentEffect(); state.dots.forEach(dot => { if(dot) resetDotToInitialVisuals(dot, false); }); state.activeEffect = newEffect; updateEffectDialsVisibility(); startCurrentEffect(); }
         function updateEffectDialsVisibility() { if (!domRefs.waveControls || !domRefs.sparkleControls) { console.error("updateEffectDialsVisibility: Control refs missing."); return; } const showWave = state.activeEffect === 'wave'; const showSparkle = state.activeEffect === 'sparkle'; try { domRefs.waveControls.forEach(el => { el.style.display = showWave ? 'flex' : 'none'; }); domRefs.sparkleControls.forEach(el => { el.style.display = showSparkle ? 'flex' : 'none'; }); } catch (error) { console.error("Error updating dial visibility:", error); } }
 
-        // --- NEW Hue Slider Functions ---
+        // --- Hue Slider Functions (Enhanced) ---
         function calculateHueSliderState(clientX) {
-            if (!state.hueSliderTrackRect) state.hueSliderTrackRect = domRefs.hueTrack.getBoundingClientRect();
+            if (!state.hueSliderTrackRect) {
+                if (domRefs.hueTrack) {
+                    state.hueSliderTrackRect = domRefs.hueTrack.getBoundingClientRect();
+                } else {
+                    console.warn("calculateHueSliderState: hueTrack ref missing.");
+                    return { percent: 50, value: 180 };
+                }
+            }
+             if (!state.hueSliderTrackRect || state.hueSliderTrackRect.width <= 0) {
+                 console.warn("calculateHueSliderState: Invalid track bounding rect.");
+                 if (domRefs.hueTrack) state.hueSliderTrackRect = domRefs.hueTrack.getBoundingClientRect();
+                 if (!state.hueSliderTrackRect || state.hueSliderTrackRect.width <= 0) {
+                    return { percent: 50, value: 180 };
+                 }
+             }
+
             let positionX = clientX - state.hueSliderTrackRect.left;
             positionX = clamp(positionX, 0, state.hueSliderTrackRect.width);
             const percent = clamp((positionX / state.hueSliderTrackRect.width) * 100, 0, 100);
@@ -1239,11 +1338,8 @@
         }
 
         function setHueSliderPosition(percent, value, animate = false) {
-            // Update the visual position of the thumb using GSAP
             gsap.killTweensOf(domRefs.hueThumbContainer, { targets: 'left', overwrite: true });
-
             const clickAnimDuration = getCssVarAsNumber('--gsap-slider-click-duration') || 0.08;
-
             if (animate) {
                 gsap.to(domRefs.hueThumbContainer, {
                     left: `${percent}%`,
@@ -1254,94 +1350,107 @@
                 gsap.set(domRefs.hueThumbContainer, { left: `${percent}%` });
             }
 
-            // Update the DFX state and trigger theme update (debounced)
             if (state.brandHue !== value) {
+                const previousHue = state.brandHue;
                 state.brandHue = value;
                 clearTimeout(state.hueUpdateTimer);
-                updateThemeColors(false); // Quick update for responsiveness
+                updateThemeColors(false);
                 state.hueUpdateTimer = setTimeout(() => {
-                    updateThemeColors(true); // Full update including dots
+                    updateThemeColors(true);
                     if (state.masterMode === 'activated' && state.currentTheme === 'saturated') {
-                        startCurrentEffect(); // Restart effect if needed for saturated theme
+                        startCurrentEffect();
                     }
+                    // Optional: Log here instead of handleEnd/handleClick if delayed logging is ok
+                    // logHueChange(previousHue, state.brandHue);
                 }, config.HUE_UPDATE_DEBOUNCE);
             }
         }
 
         function animateHueIconGrade(targetGrade) {
-            if (!domRefs.thumbIcon) return;
-            const iconAnimDuration = getCssVarAsNumber('--gsap-slider-icon-duration') || 0.1;
-            const iconAnimEase = getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-icon-ease').trim() || 'power1.out';
-
-            gsap.killTweensOf(domRefs.thumbIcon, { targets: '--slider-thumb-icon-grad', overwrite: true });
-            gsap.to(domRefs.thumbIcon, {
-                '--slider-thumb-icon-grad': targetGrade,
-                duration: iconAnimDuration,
-                ease: iconAnimEase
-            });
+             if (!domRefs.thumbIcon) return;
+             const iconAnimDuration = getCssVarAsNumber('--gsap-slider-icon-duration') || 0.1;
+             const iconAnimEase = getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-icon-ease').trim() || 'power1.out';
+             gsap.killTweensOf(domRefs.thumbIcon, { targets: '--slider-thumb-icon-grad', overwrite: true });
+             gsap.to(domRefs.thumbIcon, {
+                 '--slider-thumb-icon-grad': targetGrade,
+                 duration: iconAnimDuration,
+                 ease: iconAnimEase
+             });
         }
 
         function handleHueSliderStart(event) {
             if (state.masterMode === 'sleep') return;
             event.preventDefault();
+            event.stopPropagation(); // Prevent container click
+
             state.isDraggingHueSlider = true;
             state.hueSliderTrackRect = domRefs.hueTrack.getBoundingClientRect();
             domRefs.hueThumbContainer.style.cursor = 'grabbing';
             document.body.style.cursor = 'grabbing';
+
+            if (domRefs.hueHoverLine) {
+                gsap.to(domRefs.hueHoverLine, { opacity: 0, duration: 0.05, overwrite: true });
+            }
+
             const clientX = event.touches ? event.touches[0].clientX : event.clientX;
             const { percent, value } = calculateHueSliderState(clientX);
-            state.initialHueOnDragStart = state.brandHue; // Capture initial hue
+            state.initialHueOnDragStart = state.brandHue;
+
             const isTrackClick = event.target === domRefs.hueTrack;
-            setHueSliderPosition(percent, value, isTrackClick); // Animate jump on track click
+            setHueSliderPosition(percent, value, isTrackClick);
 
             document.addEventListener('mousemove', handleHueSliderMove);
             document.addEventListener('touchmove', handleHueSliderMove, { passive: false });
             document.addEventListener('mouseup', handleHueSliderEnd);
             document.addEventListener('touchend', handleHueSliderEnd);
-            document.addEventListener('mouseleave', handleHueSliderMouseLeave); // Handle leaving window while dragging
+            document.addEventListener('mouseleave', handleHueSliderMouseLeave);
         }
 
         function handleHueSliderMove(event) {
             if (!state.isDraggingHueSlider || state.masterMode === 'sleep') return;
-            if (event.type === 'touchmove') {
-                event.preventDefault(); // Prevent scrolling on touch devices
-            }
+            if (event.type === 'touchmove') event.preventDefault();
             const clientX = event.touches ? event.touches[0].clientX : event.clientX;
             const { percent, value } = calculateHueSliderState(clientX);
-            setHueSliderPosition(percent, value, false); // No animation during drag
+            setHueSliderPosition(percent, value, false);
         }
 
          function handleHueSliderEnd(event) {
             if (state.isDraggingHueSlider) {
                 const finalHue = state.brandHue;
                 const initialHue = state.initialHueOnDragStart;
-                const hueDiff = Math.abs(finalHue - initialHue);
-                // Log message only if hue changed significantly OR color category changed
-                if (hueDiff >= config.HUE_CHANGE_THRESHOLD || getHueCategory(finalHue) !== getHueCategory(initialHue)) {
-                    const colorCategoryKey = getHueCategory(finalHue);
-                    if (colorCategoryKey) {
-                        logMessage(getNextMessage(colorCategoryKey));
-                    }
-                }
 
-                // Reset state and cursors
+                logHueChange(initialHue, finalHue); // Use refactored logging
+
                 state.isDraggingHueSlider = false;
                 domRefs.hueThumbContainer.style.cursor = 'grab';
                 document.body.style.cursor = '';
 
-                // Reset icon grade if mouse is NOT over the container anymore
-                if (!domRefs.hueSliderContainer.matches(':hover')) {
+                const containerRect = domRefs.hueSliderContainer.getBoundingClientRect();
+                const clientX = event.changedTouches ? event.changedTouches[0].clientX : event.clientX;
+                const clientY = event.changedTouches ? event.changedTouches[0].clientY : event.clientY;
+                const isStillOverContainer = clientX >= containerRect.left && clientX <= containerRect.right &&
+                                             clientY >= containerRect.top && clientY <= containerRect.bottom;
+
+                if (!isStillOverContainer) {
                     const iconDefaultGrade = getCssVarAsNumber('--slider-thumb-icon-grad') || -25;
                     animateHueIconGrade(iconDefaultGrade);
-                    // Also reset track height if mouse leaves container entirely
                     gsap.to(domRefs.hueTrack, {
-                        '--slider-mask-height-factor': 1,
-                        duration: getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.3,
-                        ease: getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-track-leave-ease').trim() || 'power2.out',
-                        overwrite: true
-                    });
+                    '--slider-mask-height-factor': 0,
+                    boxShadow: 'var(--slider-track-inset-shadow)',
+                    duration: trackEnterDuration,
+                    ease: 'sine.out',
+                    overwrite: true
+                });     
+                if (domRefs.hueHoverLine) {
+                        gsap.to(domRefs.hueHoverLine, { opacity: 0, duration: 0.1, overwrite: true });
+                    }
+                } else {
+                     handleHueContainerMove(event); // Update line position
+                     if (domRefs.hueHoverLine) {
+                         gsap.to(domRefs.hueHoverLine, { opacity: 1, duration: 0.1, overwrite: true });
+                     }
+                     // Keep icon grade and track expanded as mouse is still over
                 }
-                // else: if mouse IS still over, the 'mouseenter' logic keeps it hovered/expanded
 
                 document.removeEventListener('mousemove', handleHueSliderMove);
                 document.removeEventListener('touchmove', handleHueSliderMove);
@@ -1352,20 +1461,69 @@
         }
 
         function handleHueSliderMouseLeave(event) {
-             // End drag if mouse leaves the browser window while dragging
              if (state.isDraggingHueSlider && (!event.relatedTarget || event.relatedTarget.nodeName === 'HTML')) {
                  handleHueSliderEnd(event);
              }
-             // Note: The icon grade and track height reset on actual mouseleave (not dragging)
-             // are handled by the 'mouseleave' listener added in initializeHueSlider.
         }
 
+        // --- NEW: Handlers for Container Hover/Click ---
+        function handleHueContainerHover(event) {
+            if (state.masterMode === 'sleep' || state.isDraggingHueSlider) return;
+            if (domRefs.hueHoverLine) {
+                gsap.to(domRefs.hueHoverLine, { opacity: 1, duration: 0.1, overwrite: true });
+                handleHueContainerMove(event);
+            }
+        }
+
+        function handleHueContainerMove(event) {
+            if (state.masterMode === 'sleep' || state.isDraggingHueSlider || !domRefs.hueHoverLine) return;
+
+            if (!state.hueSliderTrackRect) {
+                state.hueSliderTrackRect = domRefs.hueTrack.getBoundingClientRect();
+            }
+             if (!state.hueSliderTrackRect || state.hueSliderTrackRect.width <= 0) {
+                 return;
+             }
+
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            let positionX = clientX - state.hueSliderTrackRect.left;
+            positionX = clamp(positionX, 0, state.hueSliderTrackRect.width);
+
+            gsap.set(domRefs.hueHoverLine, { left: `${positionX}px` });
+        }
+
+        function handleHueContainerLeave(event) {
+            if (state.masterMode === 'sleep' || state.isDraggingHueSlider) return;
+            if (domRefs.hueHoverLine) {
+                gsap.to(domRefs.hueHoverLine, { opacity: 0, duration: 0.1, overwrite: true });
+            }
+        }
+
+        function handleHueContainerClick(event) {
+            if (state.masterMode === 'sleep' || state.isDraggingHueSlider) return;
+
+            if (domRefs.hueThumbContainer && domRefs.hueThumbContainer.contains(event.target)) {
+                return; // Let thumb drag handler take over
+            }
+
+            event.stopPropagation(); // Prevent slider start handler if click is in padding
+
+            const initialHue = state.brandHue;
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const { percent, value } = calculateHueSliderState(clientX);
+
+            setHueSliderPosition(percent, value, true); // Animate thumb jump
+
+            logHueChange(initialHue, value); // Log change immediately
+        }
+        // --- END NEW Handlers ---
+
+
         function initializeHueSlider() {
-            if (!domRefs.hueSliderContainer || !domRefs.hueTrack || !domRefs.hueThumbContainer || !domRefs.thumbIcon) {
+            if (!domRefs.hueSliderContainer || !domRefs.hueTrack || !domRefs.hueThumbContainer || !domRefs.thumbIcon || !domRefs.hueHoverLine) {
                 console.error("initializeHueSlider: Missing required DOM elements.");
                 return;
             }
-            // Set initial slider position based on DFX state
             const initialPercent = (state.brandHue / 360) * 100;
             setHueSliderPosition(initialPercent, state.brandHue, false);
 
@@ -1375,57 +1533,61 @@
             domRefs.hueTrack.addEventListener('mousedown', handleHueSliderStart);
             domRefs.hueTrack.addEventListener('touchstart', handleHueSliderStart, { passive: false });
 
-            // Icon Hover Animation (using GSAP)
-            const iconDefaultGrade = getCssVarAsNumber('--slider-thumb-icon-grad') || -25;
-            const iconHoverGrade = 200; // Hardcoded hover target, could be CSS var
+            // Container Hover & Click
+            domRefs.hueSliderContainer.addEventListener('mouseenter', handleHueContainerHover);
+            domRefs.hueSliderContainer.addEventListener('mousemove', handleHueContainerMove);
+            domRefs.hueSliderContainer.addEventListener('mouseleave', handleHueContainerLeave);
+            domRefs.hueSliderContainer.addEventListener('mousedown', handleHueContainerClick);
+            domRefs.hueSliderContainer.addEventListener('touchstart', handleHueContainerClick, { passive: true });
 
-            // Track Height Animation (using GSAP)
+            // Icon/Track Hover Animations
+            const iconDefaultGrade = getCssVarAsNumber('--slider-thumb-icon-grad') || -25;
+            const iconHoverGrade = 200;
             const trackEnterDuration = getCssVarAsNumber('--gsap-slider-track-enter-duration') || 0.1;
-            const trackLeaveDuration = getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.3;
+            const trackLeaveDuration = getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.1; // Use faster leave
             const trackLeaveEase = getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-track-leave-ease').trim() || 'power2.out';
 
             domRefs.hueSliderContainer.addEventListener('mouseenter', () => {
-                if (state.masterMode !== 'sleep') {
+                if (state.masterMode !== 'sleep' && !state.isDraggingHueSlider) {
                     animateHueIconGrade(iconHoverGrade);
-                    // Animate masks shrinking (factor to 0)
                     gsap.to(domRefs.hueTrack, {
+                        boxShadow: 'none',
                         '--slider-mask-height-factor': 0,
                         duration: trackEnterDuration,
-                        ease: 'sine.out', // Fast ease-out for enter
+                        ease: 'trackLeaveEase',
                         overwrite: true
                     });
+                    // handleHueContainerHover shows the line
                 }
             });
             domRefs.hueSliderContainer.addEventListener('mouseleave', () => {
-                if (state.masterMode !== 'sleep') {
-                    // Only reset grade if not currently dragging the thumb
-                    if (!state.isDraggingHueSlider) {
-                       animateHueIconGrade(iconDefaultGrade);
-                       // Animate masks growing back (factor to 1)
-                       gsap.to(domRefs.hueTrack, {
-                           '--slider-mask-height-factor': 1,
-                           duration: trackLeaveDuration,
-                           ease: trackLeaveEase, // Slower, smoother ease for leave
-                           overwrite: true
-                       });
-                    }
+                if (state.masterMode !== 'sleep' && !state.isDraggingHueSlider) {
+                   animateHueIconGrade(iconDefaultGrade);
+                   gsap.to(domRefs.hueTrack, {
+                       '--slider-mask-height-factor': 1,
+                       duration: trackLeaveDuration,
+                       ease: trackLeaveEase,
+                       overwrite: true
+                   });
+                   // handleHueContainerLeave hides the line
                 }
             });
 
-            // Reset track bounding rect on resize/orientation change
             window.addEventListener('resize', () => { state.hueSliderTrackRect = null; });
             window.addEventListener('orientationchange', () => { state.hueSliderTrackRect = null; });
-            console.log("Custom Hue Slider Initialized for DFX Console.");
+            console.log("Enhanced Hue Slider Initialized.");
         }
-        // --- END NEW Hue Slider Functions ---
+        // --- END Hue Slider Functions ---
 
 
         // ==========================================================================
         // 15. Event Listener Setup
         // ==========================================================================
         function setupEventListeners() {
-            const requiredRefs = ['effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'svgElement', 'masterToggle', 'themeToggle', 'hueSliderContainer', 'masterTitle', 'consolePanel', 'masterPanelWrapper', 'footerCredit'];
+            const requiredRefs = ['effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'svgElement', 'masterToggle', 'themeToggle', /*'hueSliderContainer',*/ 'masterTitle', 'consolePanel', 'masterPanelWrapper', 'footerCredit']; // Removed hueSliderContainer as its listeners are in its init
             for (const refName of requiredRefs) { if (!domRefs[refName]) { throw new Error(`Listener setup fail: Missing '${refName}'!`); } }
+
+            // --- Dial Drag Logic ---
             const handleDialMouseDown = (e) => { if (state.masterMode === 'sleep') return; const dial = e.target.closest('.dial-svg'); if (!dial || !dial.dataset.dialId) return; const container = dial.closest('.dial-container'); if (container && container.style.display === 'none') return; e.preventDefault(); const dialId = dial.dataset.dialId; const dConfig = dialConfigs[dialId]; if (!dConfig) return; state.isDraggingDial = true; state.dragDialInfo.element = dial; state.dragDialInfo.hitMin = false; state.dragDialInfo.hitMax = false; const indicator = domRefs[`indicator_${dialId}`]; if(indicator) { const transformAttr = indicator.getAttribute('transform'); const initialAngleMatch = transformAttr ? transformAttr.match(/rotate\((.*?)\)/) : null; const initialAngle = initialAngleMatch ? parseFloat(initialAngleMatch[1]) : 0; state.dragDialInfo.initialValue = dConfig.fullRange ? angleToValue360(initialAngle, dConfig.displayMin, dConfig.displayMax) : angleToValue(initialAngle, dConfig.displayMin, dConfig.displayMax); } else { state.dragDialInfo.initialValue = null; } const rect = dial.getBoundingClientRect(); state.dragDialInfo.center.x = rect.left + rect.width / 2; state.dragDialInfo.center.y = rect.top + rect.height / 2; dial.style.cursor = 'grabbing'; document.body.style.cursor = 'grabbing'; document.addEventListener('mousemove', handleDialMouseMove); document.addEventListener('mouseup', handleDialMouseUp); document.addEventListener('mouseleave', handleDialMouseUp); };
             const handleDialMouseMove = (e) => { if (state.masterMode === 'sleep' || !state.isDraggingDial || !state.dragDialInfo.element) return; e.preventDefault(); const dial = state.dragDialInfo.element; const dialId = dial.dataset.dialId; const dConfig = dialConfigs[dialId]; if (!dConfig) return; const dx = e.clientX - state.dragDialInfo.center.x; const dy = e.clientY - state.dragDialInfo.center.y; let rawAngleDeg = (radiansToDegrees(Math.atan2(dy, dx)) + 360) % 360; const finalAngle = dConfig.fullRange ? rawAngleDeg : getClampedAngle(rawAngleDeg); const indicator = domRefs[`indicator_${dialId}`]; const valueSpan = domRefs[`value_${dialId}`]; if (!indicator || !valueSpan) return; const displayedValue = updateDialVisuals(dial, indicator, valueSpan, finalAngle, dConfig.formatFn); if (isNaN(displayedValue)) return; const internalValue = mapRange(displayedValue, dConfig.displayMin, dConfig.displayMax, dConfig.internalMin, dConfig.internalMax); state[dConfig.stateProp] = internalValue; state.dragDialInfo.hitMin = (Math.abs(displayedValue - dConfig.displayMin) < config.EPSILON); state.dragDialInfo.hitMax = (Math.abs(displayedValue - dConfig.displayMax) < config.EPSILON); if (dConfig.needsSvgRecalc) setupSvg(); if (dConfig.needsEffectRestart) startCurrentEffect(); };
             const handleDialMouseUp = (e) => {
@@ -1447,26 +1609,19 @@
                             const initialValue = state.dragDialInfo.initialValue;
                             const valueChanged = Math.abs(finalValue - initialValue) > config.EPSILON;
 
-                            // --- Dial Logging Logic ---
-                            if (state.dragDialInfo.hitMax && valueChanged) {
-                                logMessage(getNextMessage('dialMax'));
-                            } else if (state.dragDialInfo.hitMin && valueChanged) {
-                                logMessage(getNextMessage('dialMin'));
-                            } else if (valueChanged) {
-                                if (dialId === 'sparkleFreq') {
-                                    logMessage(getNextMessage(finalValue > initialValue ? 'dialIncreaseFreq' : 'dialDecreaseFreq'));
-                                } else if (dialId === 'waveDirection') {
+                            if (state.dragDialInfo.hitMax && valueChanged) { logMessage(getNextMessage('dialMax')); }
+                            else if (state.dragDialInfo.hitMin && valueChanged) { logMessage(getNextMessage('dialMin')); }
+                            else if (valueChanged) {
+                                if (dialId === 'sparkleFreq') { logMessage(getNextMessage(finalValue > initialValue ? 'dialIncreaseFreq' : 'dialDecreaseFreq')); }
+                                else if (dialId === 'waveDirection') {
                                      const angle = Math.round(finalValue);
                                      if (angle >= 15 && angle <= 75) logMessage(getNextMessage('directionEast'));
                                      else if (angle >= 105 && angle <= 165) logMessage(getNextMessage('directionSouth'));
                                      else if (angle >= 195 && angle <= 255) logMessage(getNextMessage('directionWest'));
                                      else if (angle >= 285 && angle <= 345) logMessage(getNextMessage('directionNorth'));
                                      else logMessage(getNextMessage('directionGeneral'));
-                                } else {
-                                    logMessage(getNextMessage(finalValue > initialValue ? 'dialIncreaseGeneric' : 'dialDecreaseGeneric'));
-                                }
+                                } else { logMessage(getNextMessage(finalValue > initialValue ? 'dialIncreaseGeneric' : 'dialDecreaseGeneric')); }
                             }
-                            // --- End Dial Logging Logic ---
                         }
                     }
                     document.body.style.cursor = ''; state.isDraggingDial = false; state.dragDialInfo.element = null; state.dragDialInfo.initialValue = null; state.dragDialInfo.hitMin = false; state.dragDialInfo.hitMax = false; document.removeEventListener('mousemove', handleDialMouseMove); document.removeEventListener('mouseup', handleDialMouseUp); document.removeEventListener('mouseleave', handleDialMouseUp);
@@ -1474,20 +1629,12 @@
             };
             const controlSectionContainer = document.getElementById('control-section');
             if (controlSectionContainer) controlSectionContainer.addEventListener('mousedown', handleDialMouseDown); else console.error("Cannot find #control-section to attach dial listener");
+            // --- End Dial Drag Logic ---
+
             domRefs.masterToggle.addEventListener('click', (e) => { const button = e.target.closest('button'); if (!button || !button.dataset.masterMode || button.classList.contains('active')) return; const newValue = button.dataset.masterMode; initializeToggle(domRefs.masterToggle, newValue, 'masterMode'); if (newValue === 'sleep') enterSleepMode(); else enterActivatedMode(); });
-            domRefs.themeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.theme || button.classList.contains('active')) return; const newValue = button.dataset.theme; initializeToggle(domRefs.themeToggle, newValue, 'theme');
-                const themeMessageKey = themes[newValue]?.messageKey || 'themeLight'; // Fallback just in case
-                logMessage(getNextMessage(themeMessageKey));
-                applyTheme(newValue);
-            });
-            domRefs.effectTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.effectType || button.classList.contains('active')) return; const newValue = button.dataset.effectType; initializeToggle(domRefs.effectTypeToggle, newValue, 'effectType');
-                logMessage(getNextMessage(newValue === 'wave' ? 'effectWave' : 'effectSparkle'));
-                setActiveEffect(newValue);
-            });
-            domRefs.hoverTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.hoverType || button.classList.contains('active')) return; const newValue = button.dataset.hoverType; initializeToggle(domRefs.hoverTypeToggle, newValue, 'hoverType');
-                 logMessage(getNextMessage(newValue === 'attract' ? 'hoverAttract' : 'hoverRepel'));
-                 state.activeHoverMode = newValue;
-            });
+            domRefs.themeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.theme || button.classList.contains('active')) return; const newValue = button.dataset.theme; initializeToggle(domRefs.themeToggle, newValue, 'theme'); const themeMessageKey = themes[newValue]?.messageKey || 'themeLight'; logMessage(getNextMessage(themeMessageKey)); applyTheme(newValue); });
+            domRefs.effectTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.effectType || button.classList.contains('active')) return; const newValue = button.dataset.effectType; initializeToggle(domRefs.effectTypeToggle, newValue, 'effectType'); logMessage(getNextMessage(newValue === 'wave' ? 'effectWave' : 'effectSparkle')); setActiveEffect(newValue); });
+            domRefs.hoverTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.hoverType || button.classList.contains('active')) return; const newValue = button.dataset.hoverType; initializeToggle(domRefs.hoverTypeToggle, newValue, 'hoverType'); logMessage(getNextMessage(newValue === 'attract' ? 'hoverAttract' : 'hoverRepel')); state.activeHoverMode = newValue; });
 
             domRefs.tapButton.addEventListener('click', triggerPopEffect);
             domRefs.jiggleButton.addEventListener('click', triggerShakeEffect);
@@ -1496,7 +1643,7 @@
             domRefs.svgElement.addEventListener('mouseleave', handleMouseLeave);
             domRefs.svgElement.addEventListener('touchstart', handleTouchStart, { passive: false });
             window.addEventListener('resize', () => { clearTimeout(state.resizeTimer); state.resizeTimer = setTimeout(() => { setupSvg(); state.hueSliderTrackRect = null; /* Reset slider rect too */ }, 250); });
-            window.addEventListener('orientationchange', () => { state.hueSliderTrackRect = null; }); // Reset slider rect on orientation change
+            window.addEventListener('orientationchange', () => { state.hueSliderTrackRect = null; });
 
         }
 
@@ -1504,20 +1651,22 @@
         // 16. Initialization Execution
         // ==========================================================================
         function main() {
-            console.log("Initializing Application (v99 Refined v18 - New Logo, Dynamic Text)..."); // Version updated
+            console.log("Initializing Application (v99 Refined v18 - Enhanced Slider)...");
             try {
                 if (typeof gsap === 'undefined') throw new Error("GSAP library is not loaded!");
+                if (!gsap.plugins.text) throw new Error("GSAP TextPlugin is not loaded!"); // Check TextPlugin
                 if (!populateDomRefs()) throw new Error("Failed to populate critical DOM references.");
                 setupSvg();
-                initializeControls(); // This now initializes the new slider too
-                setupEventListeners();
+                initializeControls(); // Initializes dials, toggles
+                initializeHueSlider(); // Initializes the enhanced slider and its listeners
+                setupEventListeners(); // Sets up remaining listeners (dials, taps, svg hover, etc.)
                 setTimeout(() => {
                      if (state.masterMode === 'sleep') {
-                         logMessage(getNextMessage('sleep')); // Use initial sleep message
+                         logMessage(getNextMessage('sleep'));
                          setSleepDimmedState(true); initializeToggle(domRefs.masterToggle, state.masterMode, 'masterMode');
                          if (gsap && state.dots.length > 0) { const sleepColor = getComputedStyle(document.documentElement).getPropertyValue('--dot-sleep-color').trim() || '#B3BFCD'; const dotElementsToSleep = state.dots.map(d => d?.el).filter(el => el instanceof SVGElement); if (dotElementsToSleep.length > 0) { gsap.to(dotElementsToSleep, { duration: 0.5, attr: { r: 1, cy: geometry.gridCenter.y }, fill: sleepColor, overwrite: true, stagger: 0.002 }); } state.dots.forEach(d => { if(d) d.currentFill = sleepColor; }); }
                      } else {
-                         logMessage(getNextMessage('startup')); // Use startup message
+                         logMessage(getNextMessage('startup'));
                          setSleepDimmedState(false);
                          initializeToggle(domRefs.masterToggle, state.masterMode, 'masterMode');
                          startIntroAnimation();
