@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFX Console - v99 (Refined v18 - New Logo)</title> <!-- Title Updated -->
+    <!-- GSAP Core ONLY -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Raleway:wght@600&display=swap" rel="stylesheet">
+    <style>
+  /* ==========================================================================
+     1. Base Variables & Global Styles
+     ========================================================================== */
+
+  :root {
+     /* --- 1.1 Layout & Spacing --- */
+     --semantic-space-xl: 1.5rem;    /* 24px */
+     --semantic-space-m: 1rem;      /* 16px */
+     --semantic-space-s-m: 0.75rem; /* 12px */
+     --semantic-space-s: 0.5rem;    /* 8px */
+     --semantic-space-xs: 0.25rem;  /* 4px */
+     --header-controls-gap: var(--semantic-space-s-m); /* 12px - Increased gap */
+     --panel-gap: 0rem;
+     --master-panel-padding: 0.5rem;
+     --line-width-thin: 0.0625rem; /* 1px */
+     --line-width-thick: 0.125rem; /* 2px */
+     /* UPDATED: Unified height for header control containers */
+     --header-control-height: 2.625rem; /* 42px - Explicit height for PARENT DIVS of header controls */
+     --logo-height: 1.5rem; /* 24px @ 16px base */
+
+     /* --- Slider Dimensions (Using DFX Variables) --- */
+     --slider-track-height-default: 0.125rem; /* 2px (Visible height when not hovered) */
+     --slider-track-height-hover: 0.375rem;   /* 6px (Actual track element height & apparent height on hover) */
+     --slider-thumb-height: 2rem;             /* 32px @ 16px base - Unified Even Height */
+     --slider-thumb-width: 1.25rem;           /* 20px */
+     --slider-track-radius: 0.375rem;         /* 6px */
+     --slider-thumb-radius: 0.375rem;         /* 6px */
+     /* UPDATED: Height for buttons *inside* segmented controls */
+     --header-button-height: 2rem; /* 32px @ 16px base - Unified Even Height */
+
+
+     /* --- 1.2 Radii --- */
+     --semantic-radius-s: 0.25rem;  /* 4px */
+     --semantic-radius-m: 0.5rem;   /* 8px */
+     --semantic-radius-l: 1rem;     /* 16px */
+     --semantic-radius-xl: 2rem;    /* 32px */
+     /* Slider radii already defined above */
+     --master-panel-radius: 2.5rem; /* 40px */
+
+     /* --- 1.3 Fonts --- */
+     --font-headings: 'Raleway', sans-serif;
+     --font-monospace: "IBM Plex Mono", monospace;
+     /* Sizes */
+     --title-medium-font-size: 1.75rem;    /* 28px */
+     --label-medium-font-size: 1rem;      /* 16px */
+     --label-small-font-size: 0.75rem;    /* 12px */
+     --button-font-size: 0.8125rem;   /* 13px */
+     --value-font-size: 0.8125rem;    /* 13px */
+     --footer-font-size: 0.75rem; /* 12px */
+     /* Weights */
+     --title-font-weight: 600;
+     --label-font-weight: 600;
+     --button-font-weight: 600; /* Default button weight */
+     --value-font-weight: 500;
+
+     /* --- 1.4 Transitions --- */
+     --transition-duration-fast: 0.1s;
+     --transition-duration-medium: 0.2s;
+     --transition-duration-slow: 0.3s;
+     --transition-ease: ease;
+     --transition-ease-out: ease-out;
+     /* GSAP Specific Durations (from new slider, potentially prefix/adjust) */
+     --gsap-slider-click-duration: 0.08s; /* Thumb jump-to-click animation */
+     --gsap-slider-icon-duration: 0.1s;  /* Icon grade animation */
+     --gsap-slider-icon-ease: 'power1.out';
+     /* NEW: GSAP durations for track height */
+     --gsap-slider-track-enter-duration: 0.1s;
+     --gsap-slider-track-leave-duration: 0.1s;
+     --gsap-slider-track-leave-ease: 'power2.out';
+
+
+     /* --- 1.5 Shadows --- */
+     --control-shadow: 0rem 0.125rem 0.3125rem 0rem rgba(0, 0, 0, 0.15);
+     --master-panel-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.10), 0px 4px 8px 0px rgba(0, 0, 0, 0.10), 0px 2px 4px 0px rgba(0, 0, 0, 0.10);
+     --slider-track-inset-shadow: inset 0rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.25);
+     --slider-thumb-shadow: var(--control-shadow); /* Use existing DFX shadow */
+
+     /* --- 1.6 Colors (Light Theme Defaults / Fallbacks) --- */
+     /* 1.6.1 Core Colors */
+     --body-text-color: oklch(0.15 0 0);
+     --panel-border-color: oklch(0.89 0.02 255);
+     --panel-bg-base: oklch(0.96 0.01 255);
+     --panel-bg-elevated: oklch(1.00 0.00 0); /* Opaque background used for slider mask */
+     --panel-bg-sunken: oklch(0.93 0.01 255);
+     --panel-text-color: oklch(0.10 0.02 270);
+     --panel-label-color: oklch(0.10 0.02 270);
+     /* Color for panel labels, logo, inactive segmented button text */
+     --secondary-text: oklch(0.34 0.1 255);
+     --faint-control-text: oklch(0.5 0.03 255); /* Used for inactive segmented buttons */
+     --accent-color: oklch(0.51 0.08 255);
+
+     /* 1.6.2 Interaction Colors */
+     --interactive-bg: oklch(0.30 0.036 255 / 0.06);
+     --interactive-bg-hover: oklch(0.47 0.191 255 / 0.10);
+     --interactive-bg-pressed: oklch(0.42 0.191 255 / 0.10);
+     --toggle-active-shadow: var(--control-shadow);
+     --toggle-active-text: oklch(0.07 0.1 0);
+     --toggle-inactive-text: oklch(0.37 0.21 0); /* Used ONLY for disabled action button */
+     --toggle-active-bg: var(--panel-bg-elevated); /* Legacy for slider thumb if needed */
+     --button-active-bg: oklch(1 0 0); /* Segmented button & Slider thumb active background */
+     --dial-base-stroke: oklch(0.80 0 0);
+     --dial-value-text: oklch(0.20 0 0);
+
+     /* 1.6.3 Component-Specific Colors */
+     --console-text-color: #333333;
+     --svg-bg-color: oklch(0.30 0.036 255 / 0.06);
+     --dot-resting-color: #333333;
+     --dot-hover-color: oklch(0.60 0.18 255);
+     --dot-sleep-color: oklch(0.78 0.03 270);
+     --grid-line-color: oklch(0.5 0.03 255 / 0.30);
+     --cursor-hover-color: oklch(0.70 0.05 255);
+     /* --- Slider Track Gradient (Using DFX Variable) --- */
+     --slider-track-gradient: linear-gradient(90deg, grey, lightgrey);
+     --theme-icon-light-fill: oklch(1 0 0);
+     --theme-icon-light-stroke: oklch(0.80 0.01 255);
+     --theme-icon-saturated-fill: oklch(0.7 0.25 var(--brand-hue));
+     --theme-icon-saturated-stroke: oklch(0.80 0.05 var(--brand-hue));
+     --theme-icon-dark-fill: oklch(0.27 0 0);
+     --theme-icon-dark-stroke: oklch(0.50 0.02 255);
+
+     /* 1.6.4 Master Panel Colors */
+     --master-panel-border-color: rgba(255, 255, 255, 1);
+     --master-panel-bg-color: rgba(255, 255, 255, 0.20);
+
+     /* --- 1.7 Brand Hue --- */
+     --brand-hue: 255;
+
+     /* --- 1.8 Slider State Variables (For JS/GSAP) --- */
+     --hue-slider-value-percent: 50%; /* Initial value, controlled by JS */
+     --slider-thumb-icon-grad: -25; /* Initial Grade value for JS/GSAP */
+     --slider-mask-height-factor: 1; /* NEW: Controls mask height via GSAP (1 = full mask, 0 = no mask) */
+
+     /* --- 1.9 Tap Button State Variables --- */
+     --tap-icon-grad: -25; /* Initial Grade for tap icons */
+ }
+
+ /* --- Saturated Theme Overrides --- */
+ body.saturated-theme-active {
+    --body-text-color: oklch(0 0 0);
+    --panel-text-color: oklch(0 0 0);
+    --panel-label-color: oklch(0 0 0);
+    /* Color for panel labels, logo, inactive segmented button text */
+    --secondary-text: oklch(0.34 0.15 var(--brand-hue));
+    --faint-control-text: oklch(0.5 0.09 var(--brand-hue)); /* Used for inactive segmented buttons */
+    --toggle-active-text: oklch(0 0 0);
+    --toggle-inactive-text: oklch(0.20 0 0); /* Used ONLY for disabled action button */
+    --dial-value-text: oklch(0 0 0);
+    --dial-base-stroke: 'var(--panel-border-color)';
+    /* Saturated theme uses light panel background */
+    --panel-bg-elevated: oklch(1.00 0.00 0);
+ }
+
+ /* --- Dark Theme Overrides --- */
+ body.dark-theme {
+     --body-text-color: oklch(0.88 0 0);
+     --panel-border-color: oklch(0.55 0.02 var(--brand-hue));
+     --panel-bg-base: oklch(0.22 0.01 var(--brand-hue));
+     --panel-bg-elevated: oklch(0.15 0.005 var(--brand-hue)); /* Dark opaque background */
+     --panel-bg-sunken: oklch(0.15 0.00 var(--brand-hue));
+     --panel-text-color: oklch(0.88 0 0);
+     --panel-label-color: oklch(0.88 0 0);
+      /* Color for panel labels, logo, inactive segmented button text */
+     --secondary-text: oklch(0.9 0.05 var(--brand-hue));
+     --faint-control-text: oklch(0.75 0.03 var(--brand-hue)); /* Used for inactive segmented buttons */
+     --control-shadow: 0rem 0.125rem 0.3125rem 0rem rgba(0, 0, 0, 0.3);
+     --toggle-active-shadow: var(--control-shadow);
+     --toggle-active-text: oklch(1 0 0);
+     --toggle-inactive-text: oklch(0.67 0 0); /* Used ONLY for disabled action button */
+     --toggle-active-bg: #333333;
+     --button-active-bg: oklch(0.30 0.01 var(--brand-hue));
+     --dial-base-stroke: oklch(0.33 0 0);
+     --dial-value-text: oklch(0.88 0 0);
+     /* Update slider thumb shadow for dark theme */
+     --slider-thumb-shadow: var(--control-shadow);
+ }
+
+ /* ==========================================================================
+    2. Base Element Styles
+    ========================================================================== */
+ body { margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; background-color: var(--body-bg-color); color: var(--body-text-color); overflow-x: hidden; position: relative; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; transition: background-color var(--transition-duration-slow) var(--transition-ease), color var(--transition-duration-slow) var(--transition-ease); }
+ body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: transparent; filter: url(#noiseFilter); z-index: -1; pointer-events: none; }
+ * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+ }
+
+ /* ==========================================================================
+    3. Layout Containers
+    ========================================================================== */
+ #main-content-area { margin-top: calc(4.375rem - var(--master-panel-padding)); display: flex; flex-direction: column; align-items: center; width: 100%; max-width: calc(34.375rem + 2 * var(--master-panel-padding)); padding: 0; }
+ #master-panel-wrapper { width: 100%; padding: var(--master-panel-padding); border-radius: var(--master-panel-radius); border: 2px solid var(--master-panel-border-color); background: var(--master-panel-bg-color); box-shadow: var(--master-panel-shadow); transition: border-color var(--transition-duration-slow) var(--transition-ease), background-color var(--transition-duration-slow) var(--transition-ease); }
+ #control-console-frame { display: flex; flex-direction: column; align-items: stretch; gap: var(--panel-gap); width: 100%; margin-bottom: 0; overflow: hidden; border-radius: var(--semantic-radius-xl); }
+
+ /* ==========================================================================
+    4. Section Panels (Header, Display, Controls, Footer)
+    ========================================================================== */
+
+ /* --- 4.1 Header Section --- */
+ #header-section {
+    display: flex;
+    padding: var(--semantic-space-xl) var(--semantic-space-m) var(--semantic-space-m); /* Adjusted bottom padding */
+    flex-direction: column;
+    align-items: center;
+    gap: var(--semantic-space-xl);
+    align-self: stretch;
+    border-radius: var(--semantic-radius-xl) var(--semantic-radius-xl) 0 0;
+    border: 1px solid var(--panel-border-color);
+    border-bottom: 1px solid var(--panel-border-color); /* Keep bottom border */
+    background-color: var(--panel-bg-elevated);
+    transition: background-color var(--transition-duration-slow) var(--transition-ease), border-color var(--transition-duration-slow) var(--transition-ease), opacity var(--transition-duration-slow) var(--transition-ease);
+ }
+ /* UPDATED: Master Title (SVG Logo) */
+ #master-title {
+    /* REMOVED: color: var(--secondary-text); - Color is now defined in SVG */
+    margin-bottom: 0;
+    /* REMOVED: transition: color ... - No longer needed */
+    cursor: default;
+    position: relative;
+    /* Set height for the container to control SVG size */
+    height: var(--logo-height);
+    display: flex; /* Added for potential centering if needed */
+    align-items: center; /* Added for potential centering if needed */
+    justify-content: center; /* Added for potential centering if needed */
+ }
+ #master-title svg {
+    /* Size the SVG */
+    height: 100%; /* Fill the container height */
+    width: auto; /* Maintain aspect ratio */
+    /* Fill is controlled by attributes in the SVG itself */
+    display: block; /* Remove extra space below inline SVG */
+ }
+
+
+ #header-controls-row { display: flex; flex-direction: row; align-items: stretch; gap: var(--header-controls-gap); width: 100%; align-self: stretch; }
+ /* Direct child div sets the unified height for each control area */
+ #header-controls-row > div {
+    flex: 1;
+    display: flex; /* Keep flex to allow internal alignment */
+    justify-content: center; /* Center content horizontally if needed */
+    align-items: center; /* Center content vertically if needed */
+    min-width: 0;
+    height: var(--header-control-height); /* Use the unified height variable */
+ }
+
+ /* --- 4.2 Display Section (SVG + Console) --- */
+ #display-section { display: flex; flex-direction: column; align-items: stretch; background-color: var(--panel-bg-elevated); border-radius: 0; border-left: 1px solid var(--panel-border-color); border-right: 1px solid var(--panel-border-color); border-top: none; /* Seamless connection to header */ border-bottom: 1px solid var(--panel-border-color); padding: 0; gap: 0; transition: background-color var(--transition-duration-slow) var(--transition-ease), border-color var(--transition-duration-slow) var(--transition-ease); overflow: hidden; }
+ #svg-container { display: block; width: 100%; height: auto; background-color: var(--svg-bg-color); position: relative; border: none; border-radius: 0; padding: var(--semantic-space-m); transition: background-color var(--transition-duration-slow) var(--transition-ease), opacity var(--transition-duration-slow) var(--transition-ease); }
+ #console-panel { display: flex; flex-direction: column; align-items: stretch; border: none; border-radius: 0; border-top: 1px solid var(--panel-border-color); padding: var(--semantic-space-m); background-color: var(--svg-bg-color); transition: opacity var(--transition-duration-slow) var(--transition-ease), background-color var(--transition-duration-slow) var(--transition-ease), border-color var(--transition-duration-slow) var(--transition-ease); position: relative; z-index: 0; height: 5rem; overflow-y: auto; }
+ #console-panel #message-box-container { padding: 0; border: none; background: none; box-shadow: none; display: flex; align-items: flex-start; align-self: stretch; min-height: 0; height: auto; max-height: none; overflow-y: visible; margin: 0; gap: 0; border-radius: 0; }
+ #message-box-content { display: flex; flex-direction: column; width: 100%; text-align: left; font-family: var(--font-monospace); font-size: 0.8125rem; font-style: normal; font-weight: 500; line-height: 1rem; color: var(--console-text-color); background: none; border: none; border-radius: 0; padding: 0; min-height: 0; max-height: none; overflow-y: visible; white-space: pre-wrap; box-shadow: none; margin: 0; transition: color var(--transition-duration-slow) var(--transition-ease); }
+ #message-box-content div { width: 100%; }
+
+ /* --- 4.3 Control Section & Panels --- */
+ #control-section { display: flex; justify-content: center; align-items: stretch; gap: var(--panel-gap); align-self: stretch; border-left: 1px solid var(--panel-border-color); border-right: 1px solid var(--panel-border-color); border-top: none; /* Seamless connection to display section */ border-bottom: none; border-radius: 0; overflow: visible; }
+ .control-panel { border: none; border-radius: 0; padding: var(--semantic-space-m); display: flex; flex-direction: column; align-items: center; gap: var(--semantic-space-s); background-color: var(--panel-bg-elevated); transition: background-color var(--transition-duration-slow) var(--transition-ease); border-right: none; border-bottom: none; /* Seamless connection to footer */ }
+ #environment-panel, #hover-panel { flex-grow: 1; flex-basis: 0; min-width: 0; }
+ #tap-panel { flex-grow: 0; flex-shrink: 0; flex-basis: auto; width: 8.9375rem; }
+ #control-section > #environment-panel { border-bottom-left-radius: 0; }
+ #control-section > #hover-panel { border-bottom-right-radius: 0; }
+ .panel-label { color: var(--secondary-text); font-family: var(--font-headings); font-size: var(--label-medium-font-size); font-weight: var(--label-font-weight); line-height: 120%; letter-spacing: 0.015rem; margin-bottom: 0.5rem; text-align: center; width: 100%; margin-top: 0; transition: color var(--transition-duration-slow) var(--transition-ease), opacity var(--transition-duration-slow) var(--transition-ease); }
+
+ /* --- 4.4 Footer Credit Section --- */
+ #footer-credit {
+    padding: var(--semantic-space-m) var(--semantic-space-xl) var(--semantic-space-xl);
+    text-align: center;
+    color: oklch(from var(--faint-control-text) l c h / 0.5);
+    font-family: var(--font-headings);
+    font-size: var(--footer-font-size);
+    line-height: 1.4;
+    white-space: pre-line;
+    border-left: 1px solid var(--panel-border-color);
+    border-right: 1px solid var(--panel-border-color);
+    border-bottom: 1px solid var(--panel-border-color);
+    border-radius: 0 0 var(--semantic-radius-xl) var(--semantic-radius-xl);
+    background-color: var(--panel-bg-elevated);
+    transition: color var(--transition-duration-slow) var(--transition-ease),
+                border-color var(--transition-duration-slow) var(--transition-ease),
+                background-color var(--transition-duration-slow) var(--transition-ease);
+ }
+
+ /* ==========================================================================
+    5. Specific Components
+    ========================================================================== */
+
+ /* --- 5.1 Segmented Button / Toggles --- */
+ .segmented-button {
+    display: flex;
+    padding: 0.375rem; /* 6px */
+    justify-content: center;
+    align-items: center; /* Vertically center internal buttons */
+    gap: 0.375rem; /* 6px */
+    border-radius: 0.625rem; /* 10px */
+    background: var(--interactive-bg);
+    width: 100%;
+    height: 100%; /* UPDATED: Fill the parent div's height */
+    transition: background-color var(--transition-duration-medium) var(--transition-ease), opacity var(--transition-duration-slow) var(--transition-ease);
+ }
+ .segmented-button button {
+    border-radius: var(--slider-thumb-radius); /* 6px - Use slider thumb radius for consistency */
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem; /* 14px */
+    color: var(--faint-control-text);
+    font-weight: var(--button-font-weight); /* Use base weight */
+    /* UPDATED: Add font-weight to transition */
+    transition: background-color var(--transition-duration-medium) var(--transition-ease),
+                color var(--transition-duration-medium) var(--transition-ease),
+                box-shadow var(--transition-duration-medium) var(--transition-ease),
+                font-weight var(--transition-duration-medium) var(--transition-ease);
+    flex-grow: 1;
+    flex-basis: 0;
+    text-align: center;
+    white-space: nowrap;
+    height: var(--header-button-height); /* Use new unified height (2rem / 32px) for the button itself */
+    /* Padding calculation remains correct for centering text within the button */
+    padding-top: calc((var(--header-button-height) - 0.875rem) / 2); /* (32px - 14px) / 2 = 9px = 0.5625rem */
+    padding-bottom: calc((var(--header-button-height) - 0.875rem) / 2);
+    padding-left: 1.125rem; /* Keep default horizontal */
+    padding-right: 1.125rem; /* Keep default horizontal */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+ }
+ .segmented-button button:not(.active):hover {
+    background: var(--interactive-bg-hover);
+    color: var(--accent-color);
+    font-weight: calc(var(--button-font-weight) + 50); /* Increase weight on hover */
+ }
+ .segmented-button button.active {
+    background: var(--button-active-bg);
+    box-shadow: var(--toggle-active-shadow);
+    color: var(--toggle-active-text);
+    font-weight: var(--button-font-weight); /* Reset to base when active */
+    /* UPDATED: Add font-weight to transition */
+    transition: background-color var(--transition-duration-slow) var(--transition-ease),
+                color var(--transition-duration-medium) var(--transition-ease),
+                box-shadow var(--transition-duration-medium) var(--transition-ease),
+                font-weight var(--transition-duration-medium) var(--transition-ease);
+ }
+ /* Styling for buttons inside control panels (not header) - Height remains 2rem */
+ #environment-panel .segmented-button button,
+ #hover-panel .segmented-button button {
+    height: 2rem; /* Keep 32px */
+    font-size: var(--button-font-size); /* 13px */
+    padding-top: calc((2rem - var(--button-font-size)) / 2); /* (32px - 13px) / 2 = 9.5px = 0.59375rem */
+    padding-bottom: calc((2rem - var(--button-font-size)) / 2);
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+ }
+ /* Specific padding adjustments for header buttons */
+ #theme-toggle button {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+ }
+ #master-toggle button {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+ }
+ .theme-icon-circle {
+    stroke-width: 0.125rem;
+    transform-origin: center;
+    transition: transform var(--transition-duration-fast) var(--transition-ease-out),
+                fill var(--transition-duration-medium) var(--transition-ease),
+                stroke var(--transition-duration-medium) var(--transition-ease);
+ }
+ .theme-icon-circle[data-theme-icon="light"] { fill: var(--theme-icon-light-fill); stroke: var(--theme-icon-light-stroke); }
+ .theme-icon-circle[data-theme-icon="saturated"] { fill: var(--theme-icon-saturated-fill); stroke: var(--theme-icon-saturated-stroke); }
+ .theme-icon-circle[data-theme-icon="dark"] { fill: var(--theme-icon-dark-fill); stroke: var(--theme-icon-dark-stroke); }
+
+ /* --- Theme Toggle Circle Size/Hover (Universal) --- */
+ #theme-toggle button:not(.active) .theme-icon-circle {
+     transform: scale(0.75); /* Scale to 75% */
+ }
+ #theme-toggle button:not(.active):hover .theme-icon-circle {
+     transform: scale(1); /* Scale back to full size */
+ }
+ #theme-toggle button.active .theme-icon-circle {
+     transform: scale(1); /* Explicitly full size */
+ }
+
+
+/* --- 5.2 Hue Slider (NEW GSAP VERSION) --- */
+#hue-slider-container {
+    background: var(--interactive-bg);
+    border-radius: 0.625rem; /* 10px */
+    padding: 0.375rem 1rem; /* 6px vertical, 16px horizontal */
+    width: 100%;
+    box-sizing: border-box;
+    height: 100%; /* Fill the parent div's height */
+    display: flex;
+    align-items: center; /* Vertically center the track */
+    transition: background-color var(--transition-duration-slow) var(--transition-ease), opacity var(--transition-duration-slow) var(--transition-ease);
+    /* REMOVED min-height calculation - relies on parent div height */
+ }
+
+ .hue-slider-track {
+    width: 100%; /* Takes full width *within* the padded container */
+    height: var(--slider-track-height-hover); /* Use DFX variable (6px) */
+    background: var(--slider-track-gradient); /* Use DFX variable */
+    border-radius: var(--slider-track-radius); /* Use DFX variable (6px) */
+    position: relative;
+    cursor: pointer;
+    box-shadow: var(--slider-track-inset-shadow); /* Apply the inset shadow */
+    transition: box-shadow var(--transition-duration-medium) var(--transition-ease); /* Transition shadow if needed */
+    /* NEW: Define the mask height factor variable */
+    --slider-mask-height-factor: 1;
+ }
+
+ /* Masks: Control the VISIBLE track height */
+ .hue-slider-track::before,
+ .hue-slider-track::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* UPDATED: Height calculation uses CSS variable controlled by GSAP */
+    height: calc(((var(--slider-track-height-hover) - var(--slider-track-height-default)) / 2) * var(--slider-mask-height-factor));
+    background-color: var(--panel-bg-elevated);
+    /* REMOVED: CSS transition for height */
+    transition: background-color var(--transition-duration-slow) var(--transition-ease);
+    z-index: 1; /* Below thumb, above track gradient */
+    pointer-events: none;
+ }
+ .hue-slider-track::before {
+    top: 0;
+    border-radius: var(--slider-track-radius) var(--slider-track-radius) 0 0; /* Use DFX variable */
+ }
+ .hue-slider-track::after {
+    bottom: 0;
+    border-radius: 0 0 var(--slider-track-radius) var(--slider-track-radius); /* Use DFX variable */
+ }
+ /* REMOVED: CSS Hover state for masks (now handled by GSAP) */
+
+
+ /* Thumb Container: Positioned relative to the fixed-height track */
+ .hue-slider-thumb-container {
+    position: absolute;
+    top: calc((var(--slider-track-height-hover) - var(--slider-thumb-height)) / 2); /* (6px - 32px) / 2 = -13px = -0.8125rem */
+    left: var(--hue-slider-value-percent); /* Controlled by JS */
+    transform: translateX(-50%);
+    width: var(--slider-thumb-width); /* Use DFX variable (20px) */
+    height: var(--slider-thumb-height); /* Use DFX variable (32px) */
+    cursor: grab;
+    z-index: 2; /* Above track and masks */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
+ .hue-slider-thumb-container:active {
+    cursor: grabbing;
+ }
+
+ /* Thumb Visuals */
+ .hue-slider-thumb {
+    width: 100%;
+    height: 100%;
+    background-color: var(--button-active-bg); /* Use DFX variable */
+    border-radius: var(--slider-thumb-radius); /* Use DFX variable (6px) */
+    box-shadow: var(--slider-thumb-shadow); /* Use DFX variable */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Clip rotated icon if needed */
+    transition: background-color var(--transition-duration-slow) var(--transition-ease),
+                box-shadow var(--transition-duration-medium) var(--transition-ease);
+ }
+
+ /* Icon Styling */
+ .hue-slider-thumb .thumb-icon {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal; font-style: normal;
+    font-size: 1.2rem; line-height: 1;
+    letter-spacing: normal; text-transform: none;
+    display: inline-block; white-space: nowrap; word-wrap: normal;
+    direction: ltr; -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased;
+    color: var(--accent-color);
+    transform: rotate(90deg);
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' var(--slider-thumb-icon-grad, -25), 'opsz' 20;
+    cursor: inherit;
+ }
+ /* --- END NEW SLIDER CSS --- */
+
+
+ /* --- 5.3 Action Button (Tap Panel) --- */
+ .action-button {
+    display: flex;
+    padding: 0.34375rem var(--semantic-space-s);
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1 0 0;
+    align-self: stretch;
+    border-radius: var(--semantic-radius-s);
+    border: 1px solid var(--panel-border-color);
+    background: var(--interactive-bg);
+    color: var(--accent-color); /* Default color */
+    cursor: pointer;
+    font-size: var(--button-font-size);
+    font-weight: var(--button-font-weight); /* Use base weight */
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: var(--toggle-active-shadow);
+    /* UPDATED: Add font-weight to transition */
+    transition: transform var(--transition-duration-fast) var(--transition-ease),
+                box-shadow var(--transition-duration-fast) var(--transition-ease),
+                color var(--transition-duration-medium) var(--transition-ease),
+                opacity var(--transition-duration-slow) var(--transition-ease),
+                background-color var(--transition-duration-medium) var(--transition-ease),
+                border-color var(--transition-duration-medium) var(--transition-ease),
+                font-weight var(--transition-duration-medium) var(--transition-ease);
+    /* Initialize icon grad variable */
+    --tap-icon-grad: -25;
+ }
+ .action-button .material-symbols-outlined {
+    font-size: 1rem;
+    color: inherit; /* Inherit color from button */
+    position: relative;
+    top: 0.0625rem;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' var(--tap-icon-grad, -25), 'opsz' 20;
+    transition: color var(--transition-duration-medium) var(--transition-ease),
+                font-variation-settings var(--transition-duration-medium) var(--transition-ease-out);
+ }
+ .action-button .button-text { display: inline; }
+
+ /* Hover state for action button */
+ .action-button:not(:disabled):hover {
+     background: var(--interactive-bg-hover);
+     color: var(--secondary-text); /* Change text/icon color on hover */
+     font-weight: calc(var(--button-font-weight) + 50); /* Increase weight on hover */
+     --tap-icon-grad: 300; /* UPDATED: Increase GRAD on hover */
+ }
+
+ .action-button:not(:disabled):active {
+    transform: scale(0.96);
+    background-color: var(--interactive-bg-pressed);
+    color: var(--secondary-text); /* Keep hover color on active */
+    box-shadow: none;
+    font-weight: calc(var(--button-font-weight) + 50); /* Keep increased weight */
+    --tap-icon-grad: 350; /* UPDATED: Further increase GRAD on active */
+ }
+ .action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    background-color: var(--interactive-bg);
+    color: var(--toggle-inactive-text);
+    font-weight: var(--button-font-weight); /* Reset weight */
+    --tap-icon-grad: -25; /* Reset GRAD when disabled */
+ }
+
+ /* --- 5.4 Dial Controls --- */
+ .dial-area { display: flex; gap: 1.25rem; justify-content: center; width: 100%; margin-top: 0.25rem; transition: opacity var(--transition-duration-slow) var(--transition-ease); }
+ .dial-container { display: flex; flex-direction: column; align-items: center; width: 4.0625rem; }
+ .dial-label { font-size: var(--label-small-font-size); color: var(--faint-control-text); margin-bottom: 0.375rem; text-align: center; white-space: nowrap; transition: color var(--transition-duration-slow) var(--transition-ease); }
+ .dial-svg-container { width: 3.75rem; height: 3.75rem; margin-bottom: 0.25rem; position: relative; }
+ .dial-svg { width: 100%; height: 100%; cursor: grab; overflow: visible; transition: opacity var(--transition-duration-slow) var(--transition-ease); }
+ .dial-svg:active { cursor: grabbing; }
+ .dial-base { stroke: var(--dial-base-stroke); stroke-width: 0.03125; fill: var(--interactive-bg); filter: url(#dial-filter); transition: fill var(--transition-duration-medium) var(--transition-ease), stroke var(--transition-duration-slow) var(--transition-ease); }
+ .dial-svg:hover .dial-base { fill: var(--interactive-bg-hover); }
+ .dial-indicator { stroke: var(--accent-color); stroke-width: 3; stroke-linecap: round; transition: stroke var(--transition-duration-fast) var(--transition-ease); }
+ .dial-division { stroke: var(--accent-color); stroke-linecap: round; transition: stroke var(--transition-duration-fast) var(--transition-ease); }
+ .dial-value-display { font-family: var(--font-monospace); font-size: var(--value-font-size); font-weight: var(--value-font-weight); color: var(--dial-value-text); text-align: center; min-width: 1.875rem; margin-top: 0.125rem; transition: color var(--transition-duration-slow) var(--transition-ease); }
+ .dial-value-display[data-value-id="waveDirection"]::after { content: '°'; }
+
+ /* --- 5.5 SVG Element Styling --- */
+ #interactive-svg circle:not(.cursor-circle):not(.pop-ring) { pointer-events: none; }
+ #interactive-svg .cursor-circle { fill: none; stroke: var(--cursor-hover-color); stroke-width: 0.125; pointer-events: none; opacity: 0; transition: opacity var(--transition-duration-medium) var(--transition-ease-out), stroke var(--transition-duration-medium) var(--transition-ease); }
+ #interactive-svg.mouse-over .cursor-circle { opacity: 1; }
+ #interactive-svg .pop-ring { fill: none; pointer-events: none; }
+ #interactive-svg #grid-lines-group line { stroke: var(--grid-line-color); stroke-width: 0.35; pointer-events: none; transition: stroke var(--transition-duration-medium) var(--transition-ease); }
+
+ /* ==========================================================================
+    6. Utility Styles (Sleep Mode)
+    ========================================================================== */
+ body.app-sleeping .dimmable-content { opacity: 0.4; pointer-events: none; transition: opacity var(--transition-duration-slow) var(--transition-ease); }
+ body.app-sleeping #master-title,
+ body.app-sleeping #master-toggle { opacity: 1; pointer-events: auto; }
+ body.app-sleeping #master-toggle button { opacity: 1; pointer-events: auto; cursor: pointer; }
+ /* Ensure new slider elements are also dimmed/disabled */
+ body.app-sleeping #hue-slider-container { opacity: 0.4; pointer-events: none; }
+ body.app-sleeping .hue-slider-track,
+ body.app-sleeping .hue-slider-thumb-container { cursor: default !important; }
+ body.app-sleeping .dimmable-content :is(button, input[type=range], .dial-svg) { cursor: default !important; }
+ /* Footer text opacity is handled directly, not dimmed further */
+ body.app-sleeping #footer-credit { pointer-events: auto; }
+
+ /* ==========================================================================
+    7. Responsive Design (Mobile)
+    ========================================================================== */
+ @media (max-width: 500px) {
+      :root {
+          /* Mobile Header Control Height */
+          --header-control-height: 2.125rem; /* 34px */
+          --logo-height: 1.5rem; /* 24px @ 16px base - Corrected comment */
+          /* Mobile Slider Dimensions */
+          --slider-track-height-default: 0.125rem; /* 2px */
+          --slider-track-height-hover: 0.25rem;  /* 4px */
+          --slider-thumb-height: 1.375rem;       /* 22px */
+          --slider-thumb-width: 1.125rem;        /* 18px */
+          /* Mobile Header Button *Internal* Height */
+          --header-button-height: 1.75rem; /* 28px */
+      }
+      /* --- 7.1 Layout Containers --- */
+      body {
+          padding: var(--semantic-space-m);
+      }
+      #main-content-area {
+          margin-top: 0;
+          max-width: 100%;
+      }
+      #master-panel-wrapper { padding: var(--semantic-space-xs); border-radius: calc(var(--semantic-radius-xl) + var(--semantic-space-xs)); border-width: 1px; }
+      #control-console-frame { gap: var(--panel-gap); border-radius: var(--semantic-radius-xl); }
+
+      /* --- 7.2 Header Section --- */
+      #header-section { padding: var(--semantic-space-s); padding-top: var(--semantic-space-xl); border-radius: var(--semantic-radius-xl) var(--semantic-radius-xl) 0 0; border-bottom: 1px solid var(--panel-border-color); }
+      /* Mobile logo height already adjusted via :root */
+      #header-controls-row { gap: var(--header-controls-gap); }
+      /* Mobile Header Control Parent Divs height already adjusted via :root */
+
+      /* Mobile Slider Adjustments */
+      #hue-slider-container {
+          padding: 0.375rem 0.5rem; /* Keep vertical, reduce horizontal */
+          /* REMOVED min-height override - relies on parent height */
+      }
+      .hue-slider-track::before,
+      .hue-slider-track::after {
+          /* Height calculation uses the same CSS variable, no change needed here */
+      }
+      .hue-slider-thumb-container {
+          top: calc((var(--slider-track-height-hover) - var(--slider-thumb-height)) / 2); /* (4px - 22px) / 2 = -9px = -0.5625rem */
+      }
+      .hue-slider-thumb .thumb-icon {
+          font-size: 1rem; /* Slightly smaller icon on mobile? */
+      }
+
+       /* Mobile Segmented Button Adjustments */
+      /* Segmented button containers fill parent div height (mobile) */
+      .segmented-button {
+          /* height: 100% already set globally */
+      }
+      /* Internal button height and padding (mobile) */
+      .segmented-button button {
+          height: var(--header-button-height); /* Use mobile header button height (28px) */
+          font-size: 0.8125rem; /* 13px */
+          padding-top: calc((var(--header-button-height) - 0.8125rem) / 2); /* (28px - 13px) / 2 = 7.5px = 0.46875rem */
+          padding-bottom: calc((var(--header-button-height) - 0.8125rem) / 2);
+      }
+       /* Mobile hover weight reset (don't increase on touch devices maybe?) */
+       .segmented-button button:not(.active):hover,
+       .action-button:not(:disabled):hover {
+           font-weight: var(--button-font-weight); /* Keep base weight on mobile hover */
+       }
+       .action-button:not(:disabled):active {
+           font-weight: var(--button-font-weight); /* Keep base weight on mobile active */
+       }
+
+      /* Specific padding for header buttons (mobile) */
+      #theme-toggle button,
+      #master-toggle button {
+          padding-left: 0.4rem;
+          padding-right: 0.4rem;
+      }
+      /* Non-header segmented buttons (mobile) - Keep desktop height */
+      #environment-panel .segmented-button button,
+      #hover-panel .segmented-button button {
+          height: 2rem; /* Keep 32px */
+          font-size: var(--button-font-size); /* 13px */
+          padding-top: calc((2rem - var(--button-font-size)) / 2); /* 9.5px */
+          padding-bottom: calc((2rem - var(--button-font-size)) / 2);
+          padding-left: 0.625rem;
+          padding-right: 0.625rem;
+      }
+      /* Mobile Theme Toggle Circle Size */
+      #theme-toggle button:not(.active) .theme-icon-circle,
+      #theme-toggle button:not(.active):hover .theme-icon-circle {
+          transform: scale(0.75); /* Keep smaller size even on hover for mobile */
+      }
+
+
+      /* --- 7.3 Display Section --- */
+      #display-section { border-left: 1px solid var(--panel-border-color); border-right: 1px solid var(--panel-border-color); border-top: none; border-bottom: 1px solid var(--panel-border-color); border-radius: 0; padding: 0; }
+      #svg-container { padding: var(--semantic-space-s); border-radius: 0; border: none; }
+      #console-panel { padding: var(--semantic-space-s); border-radius: 0; border: none; border-top: 1px solid var(--panel-border-color); }
+
+      /* --- 7.4 Control Section & Panels --- */
+      #control-section { flex-direction: column; gap: var(--panel-gap); border: none; border-radius: 0; }
+      .control-panel { width: 100%; flex-basis: auto; flex-grow: 0; border-radius: 0; border-right: none; border-left: 1px solid var(--panel-border-color); border-right: 1px solid var(--panel-border-color); border-top: none; border-bottom: none; }
+      #tap-panel { order: 2; width: 100%; flex-direction: row; gap: var(--semantic-space-s); padding-left: var(--semantic-space-s); padding-right: var(--semantic-space-s); padding-top: 0;}
+      #environment-panel { order: 1; padding: var(--semantic-space-s); border-bottom: none; /* Remove bottom border before footer */ }
+      #hover-panel { order: 3; display: none; }
+
+      /* --- 7.5 Footer --- */
+       #footer-credit {
+           border-radius: 0 0 var(--semantic-radius-xl) var(--semantic-radius-xl);
+           border-left: 1px solid var(--panel-border-color);
+           border-right: 1px solid var(--panel-border-color);
+           border-bottom: 1px solid var(--panel-border-color); /* Bottom border */
+       }
+
+      /* --- 7.6 Component Adjustments --- */
+      #tap-panel .action-button { flex-grow: 1; flex-basis: 0; padding-left: var(--semantic-space-xs); padding-right: var(--semantic-space-xs); min-width: 0; }
+      #tap-panel .action-button .button-text { display: none; }
+      #tap-panel .action-button .material-symbols-outlined { font-size: 1.25rem; margin-right: 0; }
+      #environment-panel .dial-area { display: none; }
+      #environment-panel .panel-label,
+      #tap-panel .panel-label { display: none; }
+ }
+    </style>
+</head>
+<body>
+    <!-- Hidden SVG for filter definitions -->
+    <svg width="0" height="0" style="position:absolute;overflow:hidden;">
+        <defs>
+            <filter id="dial-filter" x="-30%" y="-30%" width="160%" height="160%" filterUnits="objectBoundingBox" color-interpolation-filters="sRGB"> <feFlood flood-opacity="0" result="BackgroundImageFix"/> <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha1"/> <feOffset dy="2"/> <feGaussianBlur stdDeviation="2"/> <feComposite in2="hardAlpha1" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.1 0"/> <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/> <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha2"/> <feOffset dy="4"/> <feGaussianBlur stdDeviation="4"/> <feComposite in2="hardAlpha2" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.1 0"/> <feBlend mode="normal" in2="effect1_dropShadow" result="effect2_dropShadow"/> <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha3"/> <feOffset dy="8"/> <feGaussianBlur stdDeviation="8"/> <feComposite in2="hardAlpha3" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.1 0"/> <feBlend mode="normal" in2="effect2_dropShadow" result="effect3_dropShadow"/> <feMerge> <feMergeNode in="effect3_dropShadow"/> <feMergeNode in="SourceGraphic"/> </feMerge> </filter>
+            <filter id='noiseFilter'> <feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/> <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.16 0" /> </filter>
+        </defs>
+    </svg>
+
+    <div id="main-content-area">
+        <div id="master-panel-wrapper">
+            <div id="control-console-frame">
+                <!-- Header Section -->
+                <div id="header-section">
+                    <!-- UPDATED: SVG Logo replaces text -->
+                    <div id="master-title">
+                        <!-- NEW SVG LOGO INSERTED HERE -->
+                        <svg viewBox="0 0 252 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.68191 15.5701L14.7554 11.0094V32.0407H20.2454C26.9391 32.0407 33.6328 30.2687 33.6328 20.0436C33.6328 9.81844 27.2033 8.04648 20.2454 8.04648H0.0175781V0H20.2454C31.8419 0 41.5008 4.79303 41.5008 20.0436C41.5008 35.2941 31.0199 40 20.2454 40H6.68191V15.5701Z" fill="var(--faint-control-text)"/>
+                            <path d="M6.68191 15.5701L14.7554 11.0094V32.0407H20.2454C26.9391 32.0407 33.6328 30.2687 33.6328 20.0436C33.6328 9.81844 27.2033 8.04648 20.2454 8.04648H0.0175781V0H20.2454C31.8419 0 41.5008 4.79303 41.5008 20.0436C41.5008 35.2941 31.0199 40 20.2454 40H6.68191V15.5701Z" fill="var(--faint-control-text)"/>
+                            <path d="M52.2291 40V0H87.1949L98.7914 13.8272L110.417 0H117.317H121.016L104.105 20L121.016 40H117.317H110.417L98.7914 26.1728L87.0775 40H78.4619H76.5672L93.4482 20L83.3783 8.04648H60.2733V16.0639H76.5672V24.1104H60.2733V40H52.2291Z" fill="var(--faint-control-text)"/>
+                            <path d="M52.2291 40V0H87.1949L98.7914 13.8272L110.417 0H117.317H121.016L104.105 20L121.016 40H117.317H110.417L98.7914 26.1728L87.0775 40H78.4619H76.5672L93.4482 20L83.3783 8.04648H60.2733V16.0639H76.5672V24.1104H60.2733V40H52.2291Z" fill="var(--faint-control-text)"/>
+                            <rect x="41" y="32" width="8" height="8" fill="var(--faint-control-text)"/>
+                            <path d="M124.129 12.3542H117.629L128.501 0H135.001V40H130.001V5L124.129 12.3542Z" fill="var(--faint-control-text)"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M144 0C141.791 0 140 1.79086 140 4V36C140 38.2091 141.791 40 144 40H170C172.209 40 174 38.2091 174 36V4C174 1.79086 172.209 0 170 0H144ZM169 5H145V35H169V5Z" fill="var(--faint-control-text)"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M222 0C219.791 0 218 1.79086 218 4V36C218 38.2091 219.791 40 222 40H248C250.209 40 252 38.2091 252 36V4C252 1.79086 250.209 0 248 0H222ZM247 5H223V35H247V5Z" fill="var(--faint-control-text)"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M183 0C180.791 0 179 1.79086 179 4V36C179 38.2091 180.791 40 183 40H209C211.209 40 213 38.2091 213 36V4C213 1.79086 211.209 0 209 0H183ZM208 5H184V35H208V5Z" fill="var(--faint-control-text)"/>
+                        </svg>
+                        <!-- END NEW SVG LOGO -->
+                    </div>
+                    <div id="header-controls-row">
+                         <!-- Parent div sets the height via --header-control-height -->
+                         <div><div id="master-toggle" class="segmented-button"> <button data-master-mode="sleep">OFF</button> <button data-master-mode="activated" class="active">ON</button> </div></div>
+                         <!-- Parent div sets the height via --header-control-height -->
+                         <div>
+                             <!-- Hue Slider Container fills parent div -->
+                             <div id="hue-slider-container" class="dimmable-content">
+                                 <!-- GSAP Slider HTML Structure (Track is centered via flex) -->
+                                 <div class="hue-slider-track" id="hue-track">
+                                     <div class="hue-slider-thumb-container" id="hue-thumb-container">
+                                         <div class="hue-slider-thumb" id="hue-thumb">
+                                             <span class="material-symbols-outlined thumb-icon" id="thumb-icon">drag_handle</span>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <!-- END NEW GSAP Slider HTML -->
+                             </div>
+                         </div>
+                         <!-- Parent div sets the height via --header-control-height -->
+                         <div><div id="theme-toggle" class="segmented-button dimmable-content"> <button data-theme="light" class="active"> <svg viewBox="0 0 20 20" width="1rem" height="1rem" aria-label="Light Theme" focusable="false"> <circle cx="10" cy="10" r="8" class="theme-icon-circle" data-theme-icon="light"/> </svg> </button> <button data-theme="saturated"> <svg viewBox="0 0 20 20" width="1rem" height="1rem" aria-label="Saturated Theme" focusable="false"> <circle cx="10" cy="10" r="8" class="theme-icon-circle" data-theme-icon="saturated"/> </svg> </button> <button data-theme="dark"> <svg viewBox="0 0 20 20" width="1rem" height="1rem" aria-label="Dark Theme" focusable="false"> <circle cx="10" cy="10" r="8" class="theme-icon-circle" data-theme-icon="dark"/> </svg> </button> </div></div>
+                    </div>
+                </div>
+
+                <!-- Display Section -->
+                <div id="display-section">
+                    <div id="svg-container" class="dimmable-content"> <svg id="interactive-svg"></svg> </div>
+                    <div id="console-panel" class="dimmable-content"> <div id="message-box-container"> <pre id="message-box-content"></pre> </div> </div>
+                </div>
+
+                 <!-- Control Section -->
+                 <div id="control-section">
+                    <div id="environment-panel" class="control-panel">
+                         <h4 class="panel-label dimmable-content">Environment</h4>
+                         <div class="segmented-button dimmable-content" id="effect-type-toggle"> <button data-effect-type="sparkle" class="active">Sparkle</button> <button data-effect-type="wave">Wave</button> </div>
+                         <div class="dial-area dimmable-content" id="effect-dials">
+                             <div class="dial-container" data-effect-type="wave"> <span class="dial-label">Direction</span> <div class="dial-svg-container"> <svg class="dial-svg" data-dial-id="waveDirection" viewBox="-15 -15 70 70"> <circle class="dial-base" cx="20" cy="20" r="18" /> <g class="dial-decorations"></g> <g class="dial-indicator-group" transform-origin="20 20"> <line class="dial-indicator" x1="20" y1="20" x2="36" y2="20"/> </g> </svg> </div> <span class="dial-value-display" data-value-id="waveDirection"></span> </div>
+                             <div class="dial-container" data-effect-type="wave"> <span class="dial-label">Power</span> <div class="dial-svg-container"> <svg class="dial-svg" data-dial-id="waveSize" viewBox="-15 -15 70 70"> <circle class="dial-base" cx="20" cy="20" r="18" /> <g class="dial-decorations"></g> <g class="dial-indicator-group" transform-origin="20 20"> <line class="dial-indicator" x1="20" y1="20" x2="36" y2="20"/> </g> </svg> </div> <span class="dial-value-display" data-value-id="waveSize"></span> </div>
+                             <div class="dial-container" data-effect-type="sparkle"> <span class="dial-label">Frequency</span> <div class="dial-svg-container"> <svg class="dial-svg" data-dial-id="sparkleFreq" viewBox="-15 -15 70 70"> <circle class="dial-base" cx="20" cy="20" r="18" /> <g class="dial-decorations"></g> <g class="dial-indicator-group" transform-origin="20 20"> <line class="dial-indicator" x1="20" y1="20" x2="36" y2="20"/> </g> </svg> </div> <span class="dial-value-display" data-value-id="sparkleFreq"></span> </div>
+                             <div class="dial-container" data-effect-type="sparkle"> <span class="dial-label">Power</span> <div class="dial-svg-container"> <svg class="dial-svg" data-dial-id="sparkleSize" viewBox="-15 -15 70 70"> <circle class="dial-base" cx="20" cy="20" r="18" /> <g class="dial-decorations"></g> <g class="dial-indicator-group" transform-origin="20 20"> <line class="dial-indicator" x1="20" y1="20" x2="36" y2="20"/> </g> </svg> </div> <span class="dial-value-display" data-value-id="sparkleSize"></span> </div>
+                         </div>
+                     </div>
+                     <div id="tap-panel" class="control-panel">
+                         <h4 class="panel-label dimmable-content" id="tap-label">Tap</h4>
+                         <button id="tap-button" class="action-button dimmable-content"> <span class="material-symbols-outlined" id="bomb-icon">bomb</span> <span class="button-text">Bomb</span> </button>
+                          <button id="jiggle-button" class="action-button dimmable-content"> <span class="material-symbols-outlined" id="shake-icon">earthquake</span> <span class="button-text">Shake</span> </button>
+                          <button id="wave-tap-button" class="action-button dimmable-content"> <span class="material-symbols-outlined">adjust</span> <span class="button-text">Pulse</span> </button>
+                     </div>
+                     <div id="hover-panel" class="control-panel">
+                          <h4 class="panel-label dimmable-content">Mouse Hover</h4>
+                          <div class="segmented-button dimmable-content" id="hover-type-toggle"> <button data-hover-type="repel" class="active">Repel</button> <button data-hover-type="attract">Attract</button> </div>
+                          <div class="dial-area dimmable-content" id="hover-dials">
+                              <div class="dial-container"> <span class="dial-label">Falloff</span> <div class="dial-svg-container"> <svg class="dial-svg" data-dial-id="hoverFalloff" viewBox="-15 -15 70 70"> <circle class="dial-base" cx="20" cy="20" r="18" /> <g class="dial-decorations"></g> <g class="dial-indicator-group" transform-origin="20 20"> <line class="dial-indicator" x1="20" y1="20" x2="36" y2="20"/> </g> </svg> </div> <span class="dial-value-display" data-value-id="hoverFalloff"></span> </div>
+                              <div class="dial-container"> <span class="dial-label" id="hover-power-label">Power</span> <div class="dial-svg-container"> <svg class="dial-svg" data-dial-id="hoverPower" viewBox="-15 -15 70 70"> <circle class="dial-base" cx="20" cy="20" r="18" /> <g class="dial-decorations"></g> <g class="dial-indicator-group" transform-origin="20 20"> <line class="dial-indicator" x1="20" y1="20" x2="36" y2="20"/> </g> </svg> </div> <span class="dial-value-display" data-value-id="hoverPower"></span> </div>
+                          </div>
+                     </div>
+                </div>
+
+                <!-- Footer Credit Section -->
+                <div id="footer-credit">Made with pixels, code, and coffee.
+© Dave Thompson Design</div>
+
+            </div> <!-- END control-console-frame -->
+        </div> <!-- END master-panel-wrapper -->
+    </div> <!-- END main-content-area -->
+
+    <script>
+    // Immediately Invoked Function Expression (IIFE) to encapsulate the code
+    (() => {
+        'use strict';
+
+        // ==========================================================================
+        // 1. Configuration & Message Strings
+        // ==========================================================================
+
+        // --- Application Configuration ---
+        const config = { TARGET_SVG_WIDTH: 500, VIEWBOX_PADDING_UNITS: 50, DOT_DIAMETER_INITIAL: 4, INITIAL_HOVER_MODE: 'repel', INITIAL_HOVER_FALLOFF: 60, INITIAL_ATTRACT_POWER: 4, INITIAL_REPEL_POWER: 4, ANIMATION_DURATION_HOVER_POS: 0.2, ANIMATION_DURATION_LEAVE: 0.3, INITIAL_ACTIVE_EFFECT: 'sparkle', INITIAL_WAVE_DIRECTION_ANGLE: 60, INITIAL_WAVE_SIZE_INCREASE: 6.0, INITIAL_WAVE_SPEED_FACTOR: 4.0, WAVE_EXPAND_DURATION: 0.2, WAVE_SHRINK_DELAY: 0.05, WAVE_SHRINK_DURATION: 0.3, BASE_WAVE_CROSS_DURATION: 0.75, WAVE_REPEAT_DELAY: 2, INITIAL_SPARKLE_SIZE_INCREASE: 6.0, INITIAL_SPARKLE_FREQUENCY: 1.5, SPARKLE_BASE_DURATION: 0.4, SPARKLE_BASE_DELAY: 0.1, SPARKLE_MIN_DURATION_FACTOR: 0.8, SPARKLE_MAX_DURATION_FACTOR: 1.2, SPARKLE_MIN_DELAY_FACTOR: 0, SPARKLE_MAX_DELAY_FACTOR: 0.5, POP_DURATION: 0.6, POP_FINAL_RADIUS: 45, POP_STROKE_WIDTH: 1.5, POP_INITIAL_OPACITY: 0.9, RING_HUE_INCREMENT: 30, SHAKE_AMOUNT: 16, SHAKE_DURATION: 0.3, SHAKE_DELAY_MAX: 0.1, PULSE_DURATION: 0.6, PULSE_MAX_RADIUS_INCREASE: 4, PULSE_MAX_Y_DISPLACEMENT: 12, PULSE_TOTAL_STAGGER: 0.4, INTRO_ANIM_DURATION: 0.8, INTRO_ANIM_STAGGER: 0.005, INTRO_ANIM_RANDOM_DELAY: 0.3, DIAL_ANGLE_MIN: 0, DIAL_ANGLE_MAX: 360, DIAL_WAVE_SIZE_MIN: 1, DIAL_WAVE_SIZE_MAX: 11, DIAL_SPARKLE_SIZE_MIN: 1, DIAL_SPARKLE_SIZE_MAX: 11, DIAL_SPARKLE_FREQ_MIN: 0.5, DIAL_SPARKLE_FREQ_MAX: 2.5, DIAL_FALLOFF_MIN: 20, DIAL_FALLOFF_MAX: 420, DIAL_POWER_MIN: 1, DIAL_POWER_MAX: 11, WAVE_SIZE_INTERNAL_MIN: 1, WAVE_SIZE_INTERNAL_MAX: 5, SPARKLE_SIZE_INTERNAL_MIN: 0.5, SPARKLE_SIZE_INTERNAL_MAX: 4.5, HOVER_POWER_INTERNAL_MIN: 10, HOVER_POWER_INTERNAL_MAX: 200, DIAL_ANGLE_PHYSICAL_MIN: 120, DIAL_ANGLE_PHYSICAL_MAX: 60, DIAL_TOTAL_ANGLE_RANGE: 300, EPSILON: 1e-6, GRID_SPACING: 20, SATURATED_HOVER_LIGHTNESS_INCREASE: 0.2, SATURATED_HOVER_CHROMA_INCREASE: 0.1, HUE_UPDATE_DEBOUNCE: 150,
+            // Hue color ranges (approximate OKLCH hue values)
+            HUE_RANGES: {
+                red: { min: 0, max: 40, key: 'hueRed' },
+                orange: { min: 40, max: 70, key: 'hueOrange' },
+                yellow: { min: 70, max: 110, key: 'hueYellow' },
+                green: { min: 110, max: 160, key: 'hueGreen' },
+                cyan: { min: 160, max: 210, key: 'hueCyan' },
+                blue: { min: 210, max: 290, key: 'hueBlue' },
+                purple: { min: 290, max: 360, key: 'huePurple' } // Includes magenta/pinkish hues
+            },
+            HUE_CHANGE_THRESHOLD: 5, // Minimum degrees change to log hue shift
+        };
+
+        // --- Application Messages (Used by getNextMessage) ---
+        const appMessages = {
+            // Startup / Master Toggle
+            startup: ["DFX 9000 Online", "System activated", "Ready for interaction", "Console initialized"],
+            sleep: ["Entering sleep mode", "System standby", "Powering down effects", "Goodnight, dots"],
+            activate: ["System activated", "Waking up...", "Effects online", "Let's get interactive!"],
+            // Hue Changes
+            hueRed: ["Feeling fiery red", "Red spectrum engaged", "Warming things up", "Hue: Crimson"],
+            hueOrange: ["Orange hues selected", "Sunset vibes", "Tangerine dream", "Hue: Amber"],
+            hueYellow: ["Sunshine yellow active", "Golden hour", "Lemon zest", "Hue: Yellow"],
+            hueGreen: ["Going green", "Emerald tones", "Forest canopy", "Hue: Verdant"],
+            hueCyan: ["Cool cyan selected", "Aqua marine flow", "Icy blues", "Hue: Cyan"],
+            hueBlue: ["Deep blue spectrum", "Oceanic vibes", "Midnight sky", "Hue: Azure"],
+            huePurple: ["Purple reigns", "Violet spectrum", "Magenta magic", "Hue: Amethyst"],
+            // Tap Actions
+            bomb: ["Kapow!", "Bam!", "Wham!", "Bombs away!", "Checkmate", "Direct hit", "Photon torpedos launched", "Target acquired", "That's the spot!"],
+            shake: ["Shake it!", "Shakin', not stirred...", "Rumble!", "Quake activated!", "Jiggle physics!"],
+            pulse: ["Resonance engaged", "Oscillations initiated", "Dotwave propagating", "Signal sent", "Pulse wave!"],
+            // Effect Mode Changes
+            effectWave: ["Light sweep online", "Wavy gravy", "Pixel surf", "Photon tsunami", "Wave mode activated"],
+            effectSparkle: ["Make it sparkle", "Pixel confetti", "Bit bling", "LED it snow", "Sparkle mode engaged"],
+            // Hover Mode Changes
+            hoverAttract: ["Gravity field anchored", "Inward bias activated", "Field compression: ON", "Attraction mode"],
+            hoverRepel: ["Negative charge applied", "Gravity field reversed", "Evasive pattern applied", "Repulsion mode"],
+            // Theme Changes
+            themeLight: ["Light theme set", "Classic illumination", "Day mode"],
+            themeSaturated: ["Saturated theme active", "Vibrant colors engaged", "Chroma boost!"],
+            themeDark: ["Dark theme set", "Entering the void", "Night mode"],
+            // Dial Adjustments
+            dialMax: ["Setting to 11? Holy Smokes", "Maximum Power!", "Limit Reached!", "Full throttle!", "Cranked to the max!"],
+            dialMin: ["Nice and easy", "Minimum reached", "Dialed down", "Lowest setting", "Taking it slow"],
+            dialIncreaseGeneric: ["Parameter increased", "Boosting level", "Turning it up", "More power!"],
+            dialDecreaseGeneric: ["Parameter decreased", "Lowering level", "Dialing it back", "Less intensity"],
+            dialIncreaseFreq: ["Frequency up", "Faster pulses", "Increasing rate", "Higher tempo"],
+            dialDecreaseFreq: ["Frequency down", "Slower pulses", "Decreasing rate", "Lower tempo"],
+            // Direction Specific (Example - Can be expanded)
+            directionEast: ["Heading East", "Eastward bound"],
+            directionSouth: ["Flying South", "Southward trajectory"],
+            directionWest: ["Go West", "Westward ho!"],
+            directionNorth: ["Traveling North", "Northward path"],
+            directionGeneral: ["Direction changed", "New heading set", "Orientation updated"],
+        };
+
+
+        // ==========================================================================
+        // 2. Theme Definitions
+        // ==========================================================================
+        const themes = {
+             light: {
+                 name: 'Light', cssClass: '', messageKey: 'themeLight',
+                 bodyBg: { l: 0.97, c: 0.003, hueSensitive: true }, bodyTextColor: { l: 0.15, c: 0.00, h: 0 },
+                 panelBgBase: { l: 0.96, c: 0.01, h: 0, hueSensitive: true }, panelBgElevated: { l: 1.00, c: 0.00, h: 0 },
+                 panelBgSunken: { l: 0.93, c: 0.01, h: 0, hueSensitive: true }, panelBorder: { l: 0.89, c: 0.02, hueSensitive: true },
+                 panelText: { l: 0.10, c: 0.02, h: 270 }, panelLabel: { l: 0.10, c: 0.02, h: 270 },
+                 toggleActiveText: { l: 0.07, c: 0.1, h: 0 }, toggleInactiveText: { l: 0.37, c: 0.21, h: 0 },
+                 dialBaseStroke: { l: 0.80, c: 0.00, h: 0 }, dialValueText: { l: 0.20, c: 0.00, h: 0 },
+                 gridLine: { l: 0.5, c: 0.13, a: 0.30, hueSensitive: true }, dotSleep: { l: 0.78, c: 0.03, h: 270, hueSensitive: false },
+                 accent: { l: 0.51, c: 0.08, hueSensitive: true }, interactiveBg: { l: 0.30, c: 0.036, a: 0.06, hueSensitive: true },
+                 interactiveBgHover: { l: 0.47, c: 0.191, a: 0.10, hueSensitive: true }, interactiveBgPressed:{ l: 0.42, c: 0.191, a: 0.10, hueSensitive: true },
+                 svgBg: { l: 0.30, c: 0.036, a: 0.06, hueSensitive: true }, cursorHover: { l: 0.70, c: 0.05, hueSensitive: true },
+                 dotHover: { l: 0.60, c: 0.18, hueSensitive: true }, bombRing: { l: 0.80, c: 0.23, hueSensitive: true },
+                 dotRestingColor: '#333333',
+                 themeIconLightFill: { l: 1.00, c: 0.00, h: 0 }, themeIconLightStroke: { l: 0.40, c: 0.01, h: 255 },
+                 themeIconSaturatedFill:{ l: 0.70, c: 0.25, hueSensitive: true }, themeIconSaturatedStroke:{ l: 0.60, c: 0.25, hueSensitive: true },
+                 themeIconDarkFill: { l: 0.27, c: 0.00, h: 0 }, themeIconDarkStroke: { l: 0.20, c: 0.02, h: 255 },
+                 faintControlText: { l: 0.5, c: 0.03, hueSensitive: true }, secondaryText: { l: 0.34, c: 0.1, hueSensitive: true },
+                 masterPanelBorder: 'rgba(255, 255, 255, 1)', masterPanelBg: 'rgba(255, 255, 255, 0.20)',
+             },
+             saturated: {
+                 name: 'Saturated', cssClass: 'saturated-theme-active', messageKey: 'themeSaturated',
+                 bodyBg: { l: 0.97, c: 0.016, hueSensitive: true }, bodyTextColor: { l: 0.00, c: 0.00, h: 0 },
+                 panelBgBase: { l: 0.95, c: 0.03, hueSensitive: true }, panelBgElevated: { l: 1.00, c: 0.00, h: 0 },
+                 panelBgSunken: { l: 0.92, c: 0.03, hueSensitive: true }, panelBorder: { l: 0.90, c: 0.05, hueSensitive: true },
+                 panelText: { l: 0.00, c: 0.00, h: 0 }, panelLabel: { l: 0.00, c: 0.00, h: 0 },
+                 toggleActiveText: { l: 0.00, c: 0.00, h: 0 }, toggleInactiveText: { l: 0.20, c: 0.00, h: 0 },
+                 dialValueText: { l: 0.00, c: 0.00, h: 0 },
+                 gridLine: { l: 0.50, c: 0.03, a: 0.40, hueSensitive: true }, dotSleep: { l: 0.40, c: 0.10, hueSensitive: true },
+                 accent: { l: 0.40, c: 0.15, hueSensitive: true }, interactiveBg: { l: 0.50, c: 0.15, a: 0.10, hueSensitive: true },
+                 interactiveBgHover: { l: 0.47, c: 0.310, a: 0.10, hueSensitive: true }, interactiveBgPressed:{ l: 0.42, c: 0.310, a: 0.10, hueSensitive: true },
+                 svgBg: { l: 0.50, c: 0.15, a: 0.10, hueSensitive: true }, cursorHover: { l: 0.75, c: 0.26, hueSensitive: true },
+                 bombRing: { l: 0.90, c: 0.23, hueSensitive: true }, dialBaseStroke: 'var(--panel-border-color)',
+                 themeIconLightFill: { l: 1.00, c: 0.00, h: 0 }, themeIconLightStroke: { l: 0.80, c: 0.05, hueSensitive: true },
+                 themeIconSaturatedFill:{ l: 0.70, c: 0.25, hueSensitive: true }, themeIconSaturatedStroke:{ l: 0.20, c: 0.20, hueSensitive: true },
+                 themeIconDarkFill: { l: 0.30, c: 0.05, hueSensitive: true }, themeIconDarkStroke: { l: 0.50, c: 0.05, hueSensitive: true },
+                 faintControlText: { l: 0.5, c: 0.09, hueSensitive: true }, secondaryText: { l: 0.34, c: 0.15, hueSensitive: true },
+                 masterPanelBorder: 'rgba(255, 255, 255, 1)', masterPanelBg: 'rgba(255, 255, 255, 0.20)',
+             },
+             dark: {
+                 name: 'Dark', cssClass: 'dark-theme', messageKey: 'themeDark',
+                 bodyBg: { l: 0.25, c: 0.003, hueSensitive: true }, bodyTextColor: { l: 0.88, c: 0.00, h: 0 },
+                 panelBgBase: { l: 0.22, c: 0.01, h: 0, hueSensitive: true }, panelBgElevated: { l: 0.15, c: 0.001, h: 0 },
+                 panelBgSunken: { l: 0.15, c: 0.00, h: 0, hueSensitive: true }, panelBorder: { l: 0.55, c: 0.02, hueSensitive: true },
+                 panelText: { l: 0.88, c: 0.00, h: 0 }, panelLabel: { l: 0.88, c: 0.00, h: 0 },
+                 toggleActiveText: { l: 1.00, c: 0.00, h: 0 }, toggleInactiveText: { l: 0.67, c: 0.00, h: 0 },
+                 dialBaseStroke: { l: 0.33, c: 0.00, h: 0 }, dialValueText: { l: 0.88, c: 0.00, h: 0 },
+                 gridLine: { l: 0.45, c: 0.04, a: 0.75, hueSensitive: true }, dotSleep: { l: 0.33, c: 0.01, h: 270, hueSensitive: false },
+                 accent: { l: 0.82, c: 0.08, hueSensitive: true }, interactiveBg: { l: 0.70, c: 0.036, a: 0.06, hueSensitive: true },
+                 interactiveBgHover: { l: 0.53, c: 0.191, a: 0.10, hueSensitive: true }, interactiveBgPressed:{ l: 0.45, c: 0.20, a: 0.10, hueSensitive: true },
+                 svgBg: { l: 0.70, c: 0.036, a: 0.06, hueSensitive: true }, cursorHover: { l: 0.65, c: 0.05, hueSensitive: true },
+                 dotHover: { l: 0.85, c: 0.08, hueSensitive: true }, bombRing: { l: 0.55, c: 0.23, hueSensitive: true },
+                 dotRestingColor: '#E0E0E0',
+                 themeIconLightFill: { l: 0.80, c: 0.00, h: 0 }, themeIconLightStroke: { l: 0.20, c: 0.01, h: 255 },
+                 themeIconSaturatedFill:{ l: 0.60, c: 0.20, hueSensitive: true }, themeIconSaturatedStroke:{ l: 0.2, c: 0.05, hueSensitive: true },
+                 themeIconDarkFill: { l: 0.18, c: 0.01, h: 0 }, themeIconDarkStroke: { l: 0.85, c: 0.02, h: 255 },
+                 faintControlText: { l: 0.75, c: 0.03, hueSensitive: true }, secondaryText: { l: 0.9, c: 0.1, hueSensitive: true },
+                 masterPanelBorder: 'rgba(255, 255, 255, 0.20)', masterPanelBg: 'rgba(255, 255, 255, 0.10)',
+             }
+         };
+
+        // ==========================================================================
+        // 3. Constants & Global State
+        // ==========================================================================
+        const constants = { SVG_NS: 'http://www.w3.org/2000/svg', DEG_TO_RAD: Math.PI / 180, };
+        const state = { masterMode: 'activated', activeHoverMode: config.INITIAL_HOVER_MODE, activeEffect: config.INITIAL_ACTIVE_EFFECT, currentTheme: 'light', brandHue: 255, isDraggingDial: false, isDraggingSvg: false, dragDialInfo: { element: null, center: { x: 0, y: 0 }, initialValue: null, hitMin: false, hitMax: false }, isMouseOverSvg: false, waveTimeline: null, sparkleTweens: [], dots: [], messageLog: [], waveDirectionAngle: config.INITIAL_WAVE_DIRECTION_ANGLE, waveSizeIncrease: mapRange(config.INITIAL_WAVE_SIZE_INCREASE, config.DIAL_WAVE_SIZE_MIN, config.DIAL_WAVE_SIZE_MAX, config.WAVE_SIZE_INTERNAL_MIN, config.WAVE_SIZE_INTERNAL_MAX), sparkleFrequency: config.INITIAL_SPARKLE_FREQUENCY, sparkleSizeIncrease: mapRange(config.INITIAL_SPARKLE_SIZE_INCREASE, config.DIAL_SPARKLE_SIZE_MIN, config.DIAL_SPARKLE_SIZE_MAX, config.SPARKLE_SIZE_INTERNAL_MIN, config.SPARKLE_SIZE_INTERNAL_MAX), hoverFalloff: config.INITIAL_HOVER_FALLOFF, hoverPower: mapRange(config.INITIAL_HOVER_MODE === 'repel' ? config.INITIAL_REPEL_POWER : config.INITIAL_ATTRACT_POWER, config.DIAL_POWER_MIN, config.DIAL_POWER_MAX, config.HOVER_POWER_INTERNAL_MIN, config.HOVER_POWER_INTERNAL_MAX), currentRingHue: themes.light.bombRing?.h ?? 255, resizeTimer: null, hueUpdateTimer: null,
+            // --- New Slider State ---
+            isDraggingHueSlider: false,
+            hueSliderTrackRect: null,
+            initialHueOnDragStart: 255, // Store hue when drag starts
+            // --- Message Index Tracker ---
+            messageIndices: {}, // Stores the next index for each message key { key: index }
+        };
+
+        // ==========================================================================
+        // 4. DOM References & Geometry
+        // ==========================================================================
+        const domRefs = {};
+        const geometry = { gridCenter: { x: 0, y: 0 }, svgRect: null, viewBoxParams: null, ctmInverse: null, scaleFactor: 1 };
+
+        // ==========================================================================
+        // 5. Helper Functions (Includes formatters needed by dialConfigs)
+        // ==========================================================================
+        function degreesToRadians(d) { return d * constants.DEG_TO_RAD; }
+        function radiansToDegrees(r) { return r * (180 / Math.PI); }
+        function getWaveDistanceMetric(x, y, angleRad) { const wx = Math.cos(angleRad), wy = Math.sin(angleRad); return x * wx + y * wy; }
+        function distance(x1, y1, x2, y2) { const dx = x1 - x2, dy = y1 - y2; return Math.sqrt(dx * dx + dy * dy); }
+        function clamp(v, min, max) { return Math.max(min, Math.min(v, max)); }
+        function mapRange(v, iMin, iMax, oMin, oMax) { if (Math.abs(iMax - iMin) < config.EPSILON) return oMin; return oMin + (oMax - oMin) * (v - iMin) / (iMax - iMin); }
+        function angleToValue(angleDeg, valMin, valMax) { const physMin = config.DIAL_ANGLE_PHYSICAL_MIN; const range = config.DIAL_TOTAL_ANGLE_RANGE; angleDeg = (angleDeg % 360 + 360) % 360; let normalizedAngle = angleDeg - physMin; if (normalizedAngle < -config.EPSILON) { normalizedAngle += 360; } normalizedAngle = clamp(normalizedAngle, 0, range); return mapRange(normalizedAngle, 0, range, valMin, valMax); }
+        function valueToAngle(value, valMin, valMax) { const physMin = config.DIAL_ANGLE_PHYSICAL_MIN; const range = config.DIAL_TOTAL_ANGLE_RANGE; value = clamp(value, valMin, valMax); const normalizedAngle = mapRange(value, valMin, valMax, 0, range); let physicalAngle = (physMin + normalizedAngle) % 360; return physicalAngle; }
+        function angleToValue360(a, valMin, valMax) { a = (a % 360 + 360) % 360; return mapRange(a, 0, 360, valMin, valMax); }
+        function valueToAngle360(v, valMin, valMax) { v = clamp(v, valMin, valMax); return mapRange(v, valMin, valMax, 0, 360); }
+        function createSvgElement(type, attributes = {}) { const el = document.createElementNS(constants.SVG_NS, type); for (const [key, value] of Object.entries(attributes)) { el.setAttribute(key, value); } return el; }
+        const formatFloat = v => (typeof v === 'number' ? v.toFixed(1) : 'N/A'); // Used by dialConfigs
+        const formatInt = v => (typeof v === 'number' ? Math.round(v) : 'N/A'); // Used by dialConfigs
+        function formatOklch(lcha, hue = null) { if (typeof lcha === 'string') return lcha; if (!lcha || typeof lcha.l !== 'number' || typeof lcha.c !== 'number') { console.warn("Invalid LCHA object:", lcha); return 'oklch(0 0 0)'; } const h = (typeof hue === 'number') ? hue.toFixed(1) : (typeof lcha.h === 'number' ? lcha.h.toFixed(1) : '0'); const l = lcha.l.toFixed(3); const c = lcha.c.toFixed(3); if (typeof lcha.a === 'number' && lcha.a < 1.0) { return `oklch(${l} ${c} ${h} / ${lcha.a.toFixed(2)})`; } else { return `oklch(${l} ${c} ${h})`; } }
+        function getClampedAngle(angleDeg) { const physMin = config.DIAL_ANGLE_PHYSICAL_MIN; const physMax = config.DIAL_ANGLE_PHYSICAL_MAX; angleDeg = (angleDeg % 360 + 360) % 360; const isInDeadZone = angleDeg > physMax && angleDeg < physMin; if (isInDeadZone) { let distToMin = Math.abs(angleDeg - physMin); let distToMax = Math.abs(angleDeg - physMax); if (physMin > physMax) { distToMin = Math.min(Math.abs(angleDeg - physMin), Math.abs(angleDeg - physMin + 360)); distToMax = Math.min(Math.abs(angleDeg - physMax), Math.abs(angleDeg - physMax - 360)); } return distToMax <= distToMin ? physMax : physMin; } else { return angleDeg; } }
+        function getPointOnCircle(cx, cy, radius, angleDeg) { const angleRad = angleDeg * constants.DEG_TO_RAD; return { x: cx + radius * Math.cos(angleRad), y: cy + radius * Math.sin(angleRad) }; }
+        // --- NEW: Cyclic Message Retriever ---
+        function getNextMessage(messageKey) {
+            const messages = appMessages[messageKey];
+            if (!Array.isArray(messages) || messages.length === 0) {
+                console.warn(`getNextMessage: No messages found for key '${messageKey}'`);
+                return `[${messageKey}...]`; // Fallback message
+            }
+            // Get current index for this key, default to 0
+            const currentIndex = state.messageIndices[messageKey] || 0;
+            // Get the message
+            const message = messages[currentIndex];
+            // Calculate and store the next index (cyclical)
+            state.messageIndices[messageKey] = (currentIndex + 1) % messages.length;
+            return message;
+        }
+        // --- END NEW ---
+        function calculateThemeGradientStops(themeName) { let l = 0.7, c = 0.12; if (themeName === 'saturated') { l = 0.70; c = 0.20; } else if (themeName === 'dark') { l = 0.70; c = 0.10; } const stops = []; const numStops = 12; for (let i = 0; i < numStops; i++) { const hue = (i * 360 / numStops); const percentage = (i / (numStops - 1)) * 100; stops.push(`oklch(${l.toFixed(3)} ${c.toFixed(3)} ${hue.toFixed(1)}) ${percentage.toFixed(2)}%`); } return stops; }
+        function buildSliderTrackGradient(themeName) { try { const stops = calculateThemeGradientStops(themeName); return `linear-gradient(90deg, ${stops.join(', ')})`; } catch (error) { console.error("Error building slider gradient:", error); return 'linear-gradient(90deg, grey, lightgrey)'; } }
+        function setDotFill(dot, newFillColor, animate = false, duration = 0.1, ease = 'none') { if (!dot || !dot.el) { console.warn("setDotFill: Invalid dot"); return; } if (animate) { gsap.to(dot.el, { fill: newFillColor, duration: duration, ease: ease, overwrite: true, onStart: () => { if (dot) dot.currentFill = newFillColor; } }); } else { gsap.set(dot.el, { fill: newFillColor }); dot.currentFill = newFillColor; } }
+        function resetDotToInitialVisuals(dot, animate = true, duration = config.ANIMATION_DURATION_LEAVE, ease = 'power2.out') { if (!dot || !dot.el || typeof dot.cx !== 'number' || typeof dot.cy !== 'number' || !dot.initialFill) { console.warn("resetDotToInitialVisuals: Invalid dot"); return; } const targetState = { attr: { cx: dot.cx, cy: dot.cy }, fill: dot.initialFill }; if (animate) { gsap.to(dot.el, { attr: targetState.attr, fill: targetState.fill, duration: duration, ease: ease, overwrite: "auto", onStart: () => { if (dot) dot.currentFill = dot.initialFill; } }); } else { gsap.set(dot.el, targetState); dot.currentFill = dot.initialFill; } }
+        function updateMessageBoxScroll() { const container = domRefs.consolePanel; if (container) { container.scrollTop = container.scrollHeight; } }
+        function logMessage(newMessage) { if (!domRefs.messageBoxContent) return; state.messageLog.push(`> ${newMessage}`); if (state.messageLog.length > 3) { state.messageLog.shift(); } updateMessageBox(); }
+        function updateMessageBox() { if (domRefs.messageBoxContent) { domRefs.messageBoxContent.innerHTML = ''; state.messageLog.forEach((line, index) => { const lineDiv = document.createElement('div'); lineDiv.textContent = line; const age = state.messageLog.length - 1 - index; lineDiv.style.opacity = age === 0 ? 1 : (age === 1 ? 0.7 : 0.4); domRefs.messageBoxContent.appendChild(lineDiv); }); updateMessageBoxScroll(); } }
+        // --- Helper to get CSS variable (numeric) ---
+        const getCssVarAsNumber = (varName) => {
+            try {
+                return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(varName).trim());
+            } catch (e) {
+                console.warn(`Could not parse CSS variable ${varName} as number.`);
+                return 0; // Return a default or handle error appropriately
+            }
+        };
+        // --- Helper to get Hue Color Category ---
+        function getHueCategory(hueValue) {
+            const hue = (hueValue % 360 + 360) % 360; // Normalize hue to 0-359.99
+            for (const color in config.HUE_RANGES) {
+                const range = config.HUE_RANGES[color];
+                // Special case for red spanning 0/360
+                if (range.key === 'hueRed' && (hue >= range.min && hue < range.max || hue >= (range.min + 360) % 360)) {
+                   return range.key;
+                }
+                if (hue >= range.min && hue < range.max) {
+                    return range.key;
+                }
+            }
+            return null; // Should not happen with full range defined
+        }
+
+        // ==========================================================================
+        // 6. Data Definitions (Requires Helpers)
+        // ==========================================================================
+        const dotCoordinates = [ [6, 6], [6, 26], [6, 46], [6, 66], [6, 86], [26, 6], [26, 26], [26, 46], [26, 66], [26, 86], [46, 6], [46, 26], [46, 46], [46, 66], [46, 86], [66, 6], [66, 26], [66, 46], [66, 66], [66, 86], [86, 6], [86, 26], [86, 46], [86, 66], [86, 86], [86, 166], [86, 186], [86, 206], [86, 226], [86, 246], [86, 266], [86, 286], [86, 306], [86, 326], [86, 346], [86, 366], [86, 386], [86, 406], [86, 426], [86, 446], [106, 6], [106, 26], [106, 46], [106, 66], [106, 86], [106, 166], [106, 186], [106, 206], [106, 226], [106, 246], [106, 266], [106, 286], [106, 306], [106, 326], [106, 346], [106, 366], [106, 386], [106, 406], [106, 426], [106, 446], [126, 6], [126, 26], [126, 46], [126, 66], [126, 86], [126, 146], [126, 166], [126, 186], [126, 206], [126, 226], [126, 246], [126, 266], [126, 286], [126, 306], [126, 326], [126, 346], [126, 366], [126, 386], [126, 406], [126, 426], [126, 446], [146, 6], [146, 26], [146, 46], [146, 66], [146, 86], [146, 146], [146, 166], [146, 186], [146, 206], [146, 226], [146, 246], [146, 266], [146, 286], [146, 306], [146, 326], [146, 346], [146, 366], [146, 386], [146, 406], [146, 426], [146, 446], [166, 6], [166, 26], [166, 46], [166, 66], [166, 86], [166, 126], [166, 146], [166, 166], [166, 186], [166, 206], [166, 226], [166, 246], [166, 266], [166, 286], [166, 306], [166, 326], [166, 346], [166, 366], [166, 386], [166, 406], [166, 426], [166, 446], [186, 6], [186, 26], [186, 46], [186, 66], [186, 86], [186, 366], [186, 386], [186, 406], [186, 426], [186, 446], [206, 6], [206, 26], [206, 46], [206, 66], [206, 86], [206, 366], [206, 386], [206, 406], [206, 426], [206, 446], [226, 6], [226, 26], [226, 46], [226, 66], [226, 86], [226, 366], [226, 386], [226, 406], [226, 426], [226, 446], [246, 6], [246, 26], [246, 46], [246, 66], [246, 86], [246, 366], [246, 386], [246, 406], [246, 426], [246, 446], [266, 6], [266, 26], [266, 46], [266, 66], [266, 86], [266, 366], [266, 386], [266, 406], [266, 426], [266, 446], [286, 6], [286, 26], [286, 46], [286, 66], [286, 86], [286, 366], [286, 386], [286, 406], [286, 426], [286, 446], [306, 6], [306, 26], [306, 46], [306, 66], [306, 86], [306, 366], [306, 386], [306, 406], [306, 426], [306, 446], [326, 446], [326, 26], [326, 6], [326, 46], [326, 66], [326, 86], [326, 106], [326, 346], [326, 366], [326, 386], [326, 406], [326, 426], [346, 26], [346, 46], [346, 66], [346, 86], [346, 106], [346, 126], [346, 326], [346, 346], [346, 366], [346, 386], [346, 406], [346, 426], [366, 26], [366, 46], [366, 66], [366, 86], [366, 106], [366, 126], [366, 146], [366, 306], [366, 326], [366, 346], [366, 366], [366, 386], [366, 406], [366, 426], [386, 46], [386, 66], [386, 86], [386, 106], [386, 126], [386, 146], [386, 166], [386, 186], [386, 206], [386, 226], [386, 246], [386, 266], [386, 286], [386, 306], [386, 326], [386, 346], [386, 366], [386, 386], [386, 406], [406, 46], [406, 66], [406, 86], [406, 106], [406, 126], [406, 146], [406, 166], [406, 186], [406, 206], [406, 226], [406, 246], [406, 266], [406, 286], [406, 306], [406, 326], [406, 346], [406, 366], [406, 386], [406, 406], [426, 66], [426, 86], [426, 106], [426, 126], [426, 146], [426, 166], [426, 186], [426, 206], [426, 226], [426, 246], [426, 266], [426, 286], [426, 306], [426, 326], [426, 346], [426, 366], [426, 386], [446, 106], [446, 126], [446, 146], [466, 146], [446, 166], [446, 186], [446, 206], [446, 226], [446, 246], [446, 266], [446, 286], [446, 306], [466, 306], [446, 326], [446, 346], [466, 166], [466, 186], [466, 206], [466, 226], [466, 246], [466, 266], [466, 286] ];
+        const DATA_BOUNDS = { minX: 6, minY: 6, maxX: 466, maxY: 446, width: 460, height: 440 };
+        const dotRadiusInitial = config.DOT_DIAMETER_INITIAL / 2;
+        const dialConfigs = { waveDirection: { stateProp: 'waveDirectionAngle', displayMin: config.DIAL_ANGLE_MIN, displayMax: config.DIAL_ANGLE_MAX, internalMin: config.DIAL_ANGLE_MIN, internalMax: config.DIAL_ANGLE_MAX, formatFn: formatInt, fullRange: true, needsEffectRestart: true, needsSvgRecalc: false }, waveSize: { stateProp: 'waveSizeIncrease', displayMin: config.DIAL_WAVE_SIZE_MIN, displayMax: config.DIAL_WAVE_SIZE_MAX, internalMin: config.WAVE_SIZE_INTERNAL_MIN, internalMax: config.WAVE_SIZE_INTERNAL_MAX, formatFn: formatFloat, fullRange: false, needsEffectRestart: true, needsSvgRecalc: false }, sparkleFreq: { stateProp: 'sparkleFrequency', displayMin: config.DIAL_SPARKLE_FREQ_MIN, displayMax: config.DIAL_SPARKLE_FREQ_MAX, internalMin: config.DIAL_SPARKLE_FREQ_MIN, internalMax: config.DIAL_SPARKLE_FREQ_MAX, formatFn: formatFloat, fullRange: false, needsEffectRestart: true, needsSvgRecalc: false }, sparkleSize: { stateProp: 'sparkleSizeIncrease', displayMin: config.DIAL_SPARKLE_SIZE_MIN, displayMax: config.DIAL_SPARKLE_SIZE_MAX, internalMin: config.SPARKLE_SIZE_INTERNAL_MIN, internalMax: config.SPARKLE_SIZE_INTERNAL_MAX, formatFn: formatFloat, fullRange: false, needsEffectRestart: true, needsSvgRecalc: false }, hoverFalloff: { stateProp: 'hoverFalloff', displayMin: config.DIAL_FALLOFF_MIN, displayMax: config.DIAL_FALLOFF_MAX, internalMin: config.DIAL_FALLOFF_MIN, internalMax: config.DIAL_FALLOFF_MAX, formatFn: formatInt, fullRange: false, needsEffectRestart: false, needsSvgRecalc: true }, hoverPower: { stateProp: 'hoverPower', displayMin: config.DIAL_POWER_MIN, displayMax: config.DIAL_POWER_MAX, internalMin: config.HOVER_POWER_INTERNAL_MIN, internalMax: config.HOVER_POWER_INTERNAL_MAX, formatFn: formatFloat, fullRange: false, needsEffectRestart: false, needsSvgRecalc: true } };
+
+        // ==========================================================================
+        // 7. Core Initialization Functions
+        // ==========================================================================
+        function populateDomRefs() {
+             const refs = {
+                 masterPanelWrapper: document.getElementById('master-panel-wrapper'),
+                 messageBoxContent: document.getElementById('message-box-content'),
+                 masterToggle: document.getElementById('master-toggle'),
+                 themeToggle: document.getElementById('theme-toggle'),
+                 // --- New Slider Refs ---
+                 hueSliderContainer: document.getElementById('hue-slider-container'),
+                 hueTrack: document.getElementById('hue-track'),
+                 hueThumbContainer: document.getElementById('hue-thumb-container'),
+                 hueThumb: document.getElementById('hue-thumb'),
+                 thumbIcon: document.getElementById('thumb-icon'),
+                 // --- End New Slider Refs ---
+                 masterTitle: document.getElementById('master-title'), // Kept ref
+                 svgElement: document.getElementById('interactive-svg'),
+                 svgContainer: document.getElementById('svg-container'),
+                 displaySection: document.getElementById('display-section'),
+                 tapButton: document.getElementById('tap-button'),
+                 jiggleButton: document.getElementById('jiggle-button'),
+                 waveTapButton: document.getElementById('wave-tap-button'),
+                 effectTypeToggle: document.getElementById('effect-type-toggle'),
+                 hoverTypeToggle: document.getElementById('hover-type-toggle'),
+                 consolePanel: document.getElementById('console-panel'),
+                 messageBoxContainer: document.getElementById('message-box-container'),
+                 footerCredit: document.getElementById('footer-credit'),
+                 cursorGravityCircle: null,
+                 waveControls: document.querySelectorAll('#effect-dials .dial-container[data-effect-type="wave"]'),
+                 sparkleControls: document.querySelectorAll('#effect-dials .dial-container[data-effect-type="sparkle"]'),
+             };
+             document.querySelectorAll('[data-dial-id]').forEach(el => { refs[`dial_${el.dataset.dialId}`] = el; });
+             document.querySelectorAll('[data-value-id]').forEach(el => { refs[`value_${el.dataset.valueId}`] = el; });
+             document.querySelectorAll('.dial-indicator-group').forEach(el => { const dial = el.closest('.dial-svg'); if (dial && dial.dataset.dialId) { refs[`indicator_${dial.dataset.dialId}`] = el; } });
+             const criticalKeys = ['masterPanelWrapper', 'svgElement', 'svgContainer', 'displaySection', 'masterToggle', 'themeToggle', 'hueSliderContainer', 'hueTrack', 'hueThumbContainer', 'hueThumb', 'thumbIcon', 'masterTitle', 'messageBoxContent', 'consolePanel', 'messageBoxContainer', 'waveControls', 'sparkleControls', 'effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'footerCredit'];
+             let refsOk = true;
+             for (const key of criticalKeys) { if (key && (!refs[key] || (refs[key] instanceof NodeList && refs[key].length === 0))) { console.error(`DOM Ref Error: Critical element '${key}' not found or empty.`); refsOk = false; } }
+             if (typeof dialConfigs !== 'undefined') {
+                 for (const id in dialConfigs) { if (!refs[`dial_${id}`] || !refs[`indicator_${id}`] || !refs[`value_${id}`]) { console.warn(`DOM Ref Warning: Missing elements for dial '${id}'.`); } }
+             } else { console.error("dialConfigs is not defined when checking refs!"); refsOk = false; }
+             if (!refsOk) throw new Error("Critical DOM elements required for initialization are missing.");
+             Object.assign(domRefs, refs);
+             return true;
+         }
+        function createGridLines() { if (!domRefs.svgElement) return; const existingGroup = domRefs.svgElement.querySelector('#grid-lines-group'); if (existingGroup) existingGroup.remove(); const gridGroup = createSvgElement('g', { id: 'grid-lines-group' }); const spacing = config.GRID_SPACING; let uniqueX = [...new Set(dotCoordinates.map(p => p[0]))].sort((a, b) => a - b); let uniqueY = [...new Set(dotCoordinates.map(p => p[1]))].sort((a, b) => a - b); const outerLineXBefore = DATA_BOUNDS.minX - spacing; const outerLineXAfter = DATA_BOUNDS.maxX + spacing; const outerLineYBefore = DATA_BOUNDS.minY - spacing; const outerLineYAfter = DATA_BOUNDS.maxY + spacing; const allXCoords = [...new Set([outerLineXBefore, ...uniqueX, outerLineXAfter])].sort((a, b) => a - b); const allYCoords = [...new Set([outerLineYBefore, ...uniqueY, outerLineYAfter])].sort((a, b) => a - b); allXCoords.forEach(x => { gridGroup.appendChild(createSvgElement('line', { x1: x, y1: outerLineYBefore, x2: x, y2: outerLineYAfter })); }); allYCoords.forEach(y => { gridGroup.appendChild(createSvgElement('line', { x1: outerLineXBefore, y1: y, x2: outerLineXAfter, y2: y })); }); domRefs.svgElement.prepend(gridGroup); }
+        function setupSvg() { if (!domRefs.svgElement || !state || !geometry) { console.error("setupSvg: Missing critical refs."); return; } const viewBoxWidth = DATA_BOUNDS.width + config.VIEWBOX_PADDING_UNITS * 2; const viewBoxHeight = DATA_BOUNDS.height + config.VIEWBOX_PADDING_UNITS * 2; geometry.scaleFactor = config.TARGET_SVG_WIDTH > 0 ? config.TARGET_SVG_WIDTH / viewBoxWidth : 1; geometry.viewBoxParams = { x: DATA_BOUNDS.minX - config.VIEWBOX_PADDING_UNITS, y: DATA_BOUNDS.minY - config.VIEWBOX_PADDING_UNITS, width: viewBoxWidth, height: viewBoxHeight }; domRefs.svgElement.setAttribute('viewBox', `${geometry.viewBoxParams.x} ${geometry.viewBoxParams.y} ${geometry.viewBoxParams.width} ${geometry.viewBoxParams.height}`); geometry.gridCenter.x = DATA_BOUNDS.minX + DATA_BOUNDS.width / 2; geometry.gridCenter.y = DATA_BOUNDS.minY + DATA_BOUNDS.height / 2; createGridLines(); if (!domRefs.cursorGravityCircle) { domRefs.cursorGravityCircle = createSvgElement('circle', { id: 'cursor-gravity-circle', class: 'cursor-circle', r: 10 }); domRefs.svgElement.appendChild(domRefs.cursorGravityCircle); } requestAnimationFrame(() => { try { geometry.svgRect = domRefs.svgElement.getBoundingClientRect(); const ctm = domRefs.svgElement.getScreenCTM(); if (!ctm) { throw new Error("setupSvg (rAF): Failed to get CTM."); } geometry.ctmInverse = ctm.inverse(); if (!geometry.ctmInverse) { throw new Error("setupSvg (rAF): Failed to invert CTM."); } } catch(rAFError) { console.error("Error inside setupSvg rAF callback:", rAFError); } }); }
+        function createDots(initialFillColor, hoverFillColor) { if (typeof dotRadiusInitial !== 'number' || isNaN(dotRadiusInitial) || dotRadiusInitial <= 0 || !domRefs.svgElement || !Array.isArray(dotCoordinates) || !gsap) { console.error("createDots: Preconditions failed."); return; } if (typeof initialFillColor !== 'string' || !initialFillColor) { console.error(`createDots: Invalid initialFillColor: ${initialFillColor}. Using fallback.`); initialFillColor = '#FF0000'; } if (typeof hoverFillColor !== 'string' || !hoverFillColor) { console.warn(`createDots: Invalid hoverFillColor: ${hoverFillColor}. Using initial.`); hoverFillColor = initialFillColor; } stopCurrentEffect(); state.dots.forEach(dot => { if (dot?.el) { gsap.killTweensOf(dot.el); dot.el.remove(); } }); state.dots = []; const fragment = document.createDocumentFragment(); dotCoordinates.forEach((coord, index) => { if (!Array.isArray(coord) || coord.length < 2 || typeof coord[0] !== 'number' || typeof coord[1] !== 'number') { console.warn(`createDots: Skipping invalid coord ${index}:`, coord); return; } const [x, y] = coord; const circle = createSvgElement('circle', { cx: x, cy: y, r: dotRadiusInitial, fill: initialFillColor }); circle.dataset.cx = x; circle.dataset.cy = y; circle.dataset.initialR = dotRadiusInitial; fragment.appendChild(circle); state.dots.push({ el: circle, initialR: dotRadiusInitial, initialFill: initialFillColor, hoverFill: hoverFillColor, currentFill: initialFillColor, cx: x, cy: y }); }); domRefs.svgElement.appendChild(fragment); }
+        function createTicks(dialSvgElement, isFullRange) { const cx = 20, cy = 20; const innerRadius = 18 + 8; const outerRadius = innerRadius + 8; const decorationsGroup = dialSvgElement.querySelector('.dial-decorations'); if (!decorationsGroup) return; decorationsGroup.innerHTML = ''; const fragment = document.createDocumentFragment(); const thickStrokeWidth = '2'; const thinStrokeWidth = '1'; const cardinalAngles = [0, 90, 180, 270]; if (isFullRange) { const tickAngles = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]; tickAngles.forEach(angle => { const p1 = getPointOnCircle(cx, cy, innerRadius, angle); const p2 = getPointOnCircle(cx, cy, outerRadius, angle); const strokeWidth = cardinalAngles.includes(angle) ? thickStrokeWidth : thinStrokeWidth; const tick = createSvgElement('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, class: 'dial-division', 'stroke-width': strokeWidth }); fragment.appendChild(tick); }); } else { const tickAngles = [120, 150, 180, 210, 240, 270, 300, 330, 0, 30, 60]; tickAngles.forEach(angle => { const p1 = getPointOnCircle(cx, cy, innerRadius, angle); const p2 = getPointOnCircle(cx, cy, outerRadius, angle); const isMin = Math.abs(angle - config.DIAL_ANGLE_PHYSICAL_MIN) < config.EPSILON; const isMax = Math.abs(angle - config.DIAL_ANGLE_PHYSICAL_MAX) < config.EPSILON; const strokeWidth = (isMin || isMax) ? thickStrokeWidth : thinStrokeWidth; const tick = createSvgElement('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, class: 'dial-division', 'stroke-width': strokeWidth }); fragment.appendChild(tick); }); } decorationsGroup.appendChild(fragment); }
+        function initializeDial(dialId) { const dConfig = dialConfigs[dialId]; const dialEl = domRefs[`dial_${dialId}`]; const indicatorEl = domRefs[`indicator_${dialId}`]; const valueEl = domRefs[`value_${dialId}`]; if (!dConfig || !dialEl || !indicatorEl || !valueEl) { console.warn(`initializeDial: Missing config/elements for dial '${dialId}'.`); if (valueEl) valueEl.textContent = 'Err'; return; } createTicks(dialEl, dConfig.fullRange); const stateVal = state[dConfig.stateProp]; if (typeof stateVal !== 'number' || typeof dConfig.displayMin !== 'number' || typeof dConfig.displayMax !== 'number') { console.warn(`initializeDial: Invalid state/config value for dial '${dialId}'.`); valueEl.textContent = 'Err'; return; } dialEl.dataset.dialId = dialId; dialEl.dataset.min = dConfig.displayMin; dialEl.dataset.max = dConfig.displayMax; dialEl.dataset.format = (dConfig.formatFn === formatFloat) ? 'float' : 'int'; const displayValue = mapRange(stateVal, dConfig.internalMin, dConfig.internalMax, dConfig.displayMin, dConfig.displayMax); const initialAngle = dConfig.fullRange ? valueToAngle360(displayValue, dConfig.displayMin, dConfig.displayMax) : valueToAngle(displayValue, dConfig.displayMin, dConfig.displayMax); updateDialVisuals(dialEl, indicatorEl, valueEl, initialAngle, dConfig.formatFn); }
+        function initializeToggle(toggleContainerRef, activeValue, dataAttributeKey) { if (!toggleContainerRef) { console.warn(`initializeToggle: Invalid container ref for key '${dataAttributeKey}'.`); return; } const buttons = toggleContainerRef.querySelectorAll('button'); buttons.forEach(btn => { btn.classList.toggle('active', btn.dataset[dataAttributeKey] === activeValue); }); }
+        function initializeControls() {
+            if (!domRefs.effectTypeToggle || !domRefs.hoverTypeToggle || !domRefs.themeToggle || !domRefs.hueSliderContainer) {
+                console.error("initializeControls: Missing toggle/slider refs.");
+                return;
+            }
+            Object.keys(dialConfigs).forEach(dialId => { initializeDial(dialId); });
+            initializeToggle(domRefs.effectTypeToggle, state.activeEffect, 'effectType');
+            initializeToggle(domRefs.hoverTypeToggle, state.activeHoverMode, 'hoverType');
+            initializeToggle(domRefs.themeToggle, state.currentTheme, 'theme');
+            // Initialize the NEW Hue Slider
+            initializeHueSlider();
+            applyTheme(state.currentTheme, false); // Apply theme *after* slider init to get correct colors
+            updateEffectDialsVisibility();
+            const hoverPowerLabel = document.getElementById('hover-power-label');
+            if (hoverPowerLabel) hoverPowerLabel.textContent = "Power";
+            else console.warn("initializeControls: hover-power-label missing.");
+        }
+
+        // ==========================================================================
+        // 8. Theme Management Functions
+        // ==========================================================================
+        function updateThemeColors(updateDots = true) {
+            const root = document.documentElement; const rootStyle = root.style;
+            const currentThemeDef = themes[state.currentTheme]; const hue = state.brandHue;
+            const cssVariablesToSet = { '--brand-hue': hue.toFixed(1) };
+            const setVar = (varName, value) => { if (value) cssVariablesToSet[varName] = value; };
+            const bodyBgDef = currentThemeDef.bodyBg; const bodyBgColor = bodyBgDef ? formatOklch(bodyBgDef, bodyBgDef.hueSensitive ? hue : bodyBgDef.h) : 'oklch(1 0 0)'; setVar('--body-bg-color', bodyBgColor);
+            const sliderGradientString = buildSliderTrackGradient(state.currentTheme); setVar('--slider-track-gradient', sliderGradientString);
+            let calculatedDotRestingColor, calculatedDotHoverColor;
+            if (state.currentTheme === 'saturated') { const baseDotLC = currentThemeDef.accent; calculatedDotRestingColor = formatOklch(baseDotLC, hue); const hoverL = Math.min(1.0, baseDotLC.l + config.SATURATED_HOVER_LIGHTNESS_INCREASE); const hoverC = baseDotLC.c + config.SATURATED_HOVER_CHROMA_INCREASE; calculatedDotHoverColor = formatOklch({ l: hoverL, c: hoverC }, hue); } else { calculatedDotRestingColor = currentThemeDef.dotRestingColor; calculatedDotHoverColor = formatOklch(currentThemeDef.dotHover, hue); if (typeof calculatedDotRestingColor !== 'string') { calculatedDotRestingColor = (state.currentTheme === 'dark') ? '#E0E0E0' : '#333333'; console.warn("Used fallback dotRestingColor"); } }
+            setVar('--dot-resting-color', calculatedDotRestingColor); setVar('--dot-hover-color', calculatedDotHoverColor);
+            const bombRingDef = currentThemeDef.bombRing; if (bombRingDef && typeof bombRingDef === 'object') { state.currentRingHue = bombRingDef.hueSensitive ? hue : (bombRingDef.h ?? hue); } else { state.currentRingHue = hue; }
+            const keyToVarMap = { bodyTextColor: '--body-text-color', panelBgBase: '--panel-bg-base', panelBgElevated: '--panel-bg-elevated', panelBgSunken: '--panel-bg-sunken', panelBorder: '--panel-border-color', panelText: '--panel-text-color', panelLabel: '--panel-label-color', toggleActiveText: '--toggle-active-text', toggleInactiveText: '--toggle-inactive-text', dialBaseStroke: '--dial-base-stroke', dialValueText: '--dial-value-text', gridLine: '--grid-line-color', dotSleep: '--dot-sleep-color', accent: '--accent-color', interactiveBg: '--interactive-bg', interactiveBgHover: '--interactive-bg-hover', interactiveBgPressed: '--interactive-bg-pressed', svgBg: '--svg-bg-color', cursorHover: '--cursor-hover-color', themeIconLightFill: '--theme-icon-light-fill', themeIconLightStroke: '--theme-icon-light-stroke', themeIconSaturatedFill: '--theme-icon-saturated-fill', themeIconSaturatedStroke: '--theme-icon-saturated-stroke', themeIconDarkFill: '--theme-icon-dark-fill', themeIconDarkStroke: '--theme-icon-dark-stroke', faintControlText: '--faint-control-text', secondaryText: '--secondary-text', masterPanelBorder: '--master-panel-border-color', masterPanelBg: '--master-panel-bg-color', };
+            for (const key in currentThemeDef) { const valueDef = currentThemeDef[key]; const cssVarName = keyToVarMap[key]; if (cssVarName) { let cssValue = null; if (typeof valueDef === 'object' && valueDef !== null && typeof valueDef.l === 'number') { const effectiveHue = valueDef.hueSensitive ? hue : (valueDef.h ?? null); cssValue = formatOklch(valueDef, effectiveHue); } else if (typeof valueDef === 'string') { cssValue = valueDef; } if (cssValue) { setVar(cssVarName, cssValue); } } }
+            for (const varName in cssVariablesToSet) { rootStyle.setProperty(varName, cssVariablesToSet[varName]); }
+            if (updateDots && Array.isArray(state.dots)) { state.dots.forEach(dot => { if (dot && dot.el) { const wasHoverFill = dot.currentFill === dot.hoverFill; dot.initialFill = calculatedDotRestingColor; dot.hoverFill = calculatedDotHoverColor; if (!wasHoverFill) { setDotFill(dot, calculatedDotRestingColor, false); } } }); }
+            if (calculatedDotRestingColor) { setVar('--console-text-color', calculatedDotRestingColor); rootStyle.setProperty('--console-text-color', calculatedDotRestingColor); if (domRefs.messageBoxContent) { domRefs.messageBoxContent.style.color = calculatedDotRestingColor; } }
+        }
+        function applyTheme(themeName, startEffect = true) {
+            const newThemeDef = themes[themeName] || themes.light; const body = document.body;
+            stopCurrentEffect(); state.dots.forEach(dot => { if (dot?.el) gsap.killTweensOf(dot.el); });
+            body.classList.remove('dark-theme', 'saturated-theme-active'); if (newThemeDef.cssClass) { body.classList.add(newThemeDef.cssClass); }
+            state.currentTheme = themeName; updateThemeColors(true);
+            let targetInitialFill = getComputedStyle(document.documentElement).getPropertyValue('--dot-resting-color').trim(); let targetHoverFill = getComputedStyle(document.documentElement).getPropertyValue('--dot-hover-color').trim();
+             if (!targetInitialFill) { targetInitialFill = (themeName === 'dark') ? '#E0E0E0' : '#333333'; console.warn("Fallback used for targetInitialFill"); } if (!targetHoverFill) { targetHoverFill = targetInitialFill; console.warn("Fallback used for targetHoverFill"); }
+            createDots(targetInitialFill, targetHoverFill);
+            // Update slider position based on current hue AFTER theme applied
+            setHueSliderPosition((state.brandHue / 360) * 100, state.brandHue, false);
+            if (startEffect && state.masterMode === 'activated') { startCurrentEffect(); }
+         }
+
+        // ==========================================================================
+        // 9. Animation Control Functions (Background Effects)
+        // ==========================================================================
+        function stopSparkleAnimation() { if (Array.isArray(state.sparkleTweens) && state.sparkleTweens.length > 0) { state.sparkleTweens.forEach(tween => tween?.kill()); state.sparkleTweens = []; } }
+        function startSparkleAnimation() { if (state.masterMode === 'sleep' || state.activeEffect !== 'sparkle' || !gsap || !Array.isArray(state.dots) || state.dots.length === 0) return; stopSparkleAnimation(); const freq = Math.max(config.EPSILON, state.sparkleFrequency || 1); const internalSize = state.sparkleSizeIncrease; const baseDuration = config.SPARKLE_BASE_DURATION / freq; const baseDelay = config.SPARKLE_BASE_DELAY / freq; const maxRadius = dotRadiusInitial + internalSize; state.dots.forEach((dot, index) => { if (!dot || !(dot.el instanceof SVGElement) || typeof dot.initialR !== 'number') { console.warn(`startSparkleAnimation: Skipping invalid dot ${index}`); return; } try { gsap.set(dot.el, { attr: { r: dot.initialR }, fill: dot.initialFill }); dot.currentFill = dot.initialFill; const tween = gsap.to(dot.el, { attr: { r: () => gsap.utils.random(dot.initialR, maxRadius) }, duration: () => gsap.utils.random(config.SPARKLE_MIN_DURATION_FACTOR, config.SPARKLE_MAX_DURATION_FACTOR) * baseDuration, delay: () => gsap.utils.random(config.SPARKLE_MIN_DELAY_FACTOR, config.SPARKLE_MAX_DELAY_FACTOR) * baseDelay, ease: "power1.inOut", yoyo: true, repeat: -1, repeatRefresh: true, overwrite: "auto" }); state.sparkleTweens.push(tween); } catch (error) { console.error(`Error creating sparkle tween for dot ${index}:`, error); } }); }
+        function stopWaveAnimation() { if (state.waveTimeline) { state.waveTimeline.kill(); state.waveTimeline = null; } }
+        function startWaveAnimation() { if (state.masterMode === 'sleep' || state.activeEffect !== 'wave' || !gsap || !Array.isArray(state.dots) || state.dots.length === 0) return; stopWaveAnimation(); const internalSize = state.waveSizeIncrease; const dotRadiusWave = dotRadiusInitial + internalSize; const waveCrossDuration = config.BASE_WAVE_CROSS_DURATION / (config.INITIAL_WAVE_SPEED_FACTOR || 1); const angleRad = degreesToRadians(state.waveDirectionAngle); let minD = Infinity, maxD = -Infinity, validDotsExist = false; state.dots.forEach(dot => { if (!dot || typeof dot.cx !== 'number' || typeof dot.cy !== 'number') return; const d = getWaveDistanceMetric(dot.cx, dot.cy, angleRad); minD = Math.min(minD, d); maxD = Math.max(maxD, d); validDotsExist = true; }); if (!validDotsExist) { console.error("startWaveAnimation: No valid dots."); return; } const range = maxD - minD; if (range < config.EPSILON) { console.warn("startWaveAnimation: Wave range negligible."); } const dotElements = state.dots.map(d => d?.el).filter(el => el instanceof SVGElement); if (dotElements.length === 0) { console.error("startWaveAnimation: No valid SVG dots."); return; } dotElements.forEach((el, i) => { const dot = state.dots.find(d => d?.el === el); if (dot) { gsap.set(el, { attr: { r: dot.initialR }, fill: dot.initialFill }); dot.currentFill = dot.initialFill; } }); state.waveTimeline = gsap.timeline({ repeat: -1, repeatDelay: config.WAVE_REPEAT_DELAY, onKill: () => { state.waveTimeline = null; } }); const staggerFn = (index, target) => { const dot = state.dots.find(d => d?.el === target); if (!dot || typeof dot.cx !== 'number' || typeof dot.cy !== 'number') return 0; const d = getWaveDistanceMetric(dot.cx, dot.cy, angleRad); return range > config.EPSILON ? ((d - minD) / range) * waveCrossDuration : 0; }; try { state.waveTimeline.to(dotElements, { attr: { r: dotRadiusWave }, duration: config.WAVE_EXPAND_DURATION, ease: "sine.out", stagger: staggerFn }, 0).to(dotElements, { attr: { r: dotRadiusInitial }, duration: config.WAVE_SHRINK_DURATION, ease: "sine.in", stagger: staggerFn }, `+=${config.WAVE_SHRINK_DELAY}`); } catch (error) { console.error("Error creating wave tweens:", error); stopWaveAnimation(); } }
+        function stopCurrentEffect() { if (state.activeEffect === 'wave') stopWaveAnimation(); else if (state.activeEffect === 'sparkle') stopSparkleAnimation(); }
+        function startCurrentEffect() { if (state.masterMode !== 'activated') return; if (state.activeEffect === 'wave') startWaveAnimation(); else if (state.activeEffect === 'sparkle') startSparkleAnimation(); }
+
+        // ==========================================================================
+        // 10. Interaction Effect Functions (Tap Effects)
+        // ==========================================================================
+        function triggerPopEffect() { if (state.masterMode === 'sleep' || !gsap || !state || !domRefs.tapButton || !domRefs.svgElement || !Array.isArray(state.dots) || state.dots.length === 0) { console.warn("triggerPopEffect: Preconditions failed."); return; } const currentThemeDef = themes[state.currentTheme]; if (!currentThemeDef?.bombRing) { console.error("Bomb ring color def not found."); return; } stopCurrentEffect();
+            logMessage(getNextMessage('bomb')); // Use new message getter
+            const bombRingBase = currentThemeDef.bombRing; const popColor = formatOklch(bombRingBase, state.currentRingHue); state.currentRingHue = (state.currentRingHue + config.RING_HUE_INCREMENT) % 360; const shuffledDots = [...state.dots].sort(() => 0.5 - Math.random()); const targetCount = Math.floor(shuffledDots.length * 0.33); const targetDots = shuffledDots.slice(0, targetCount); const fragment = document.createDocumentFragment(); let animationsComplete = 0; if (targetDots.length === 0) { startCurrentEffect(); return; } targetDots.forEach((dot, index) => { if (!dot || !(dot.el instanceof SVGElement) || typeof dot.cx !== 'number' || typeof dot.cy !== 'number') { console.warn(`triggerPopEffect: Skipping invalid dot ${index}.`); animationsComplete++; return; } const ring = createSvgElement('circle', { cx: dot.cx, cy: dot.cy, r: dotRadiusInitial, stroke: popColor, 'stroke-width': config.POP_STROKE_WIDTH, class: 'pop-ring' }); fragment.appendChild(ring); gsap.fromTo(ring, { attr: { r: dotRadiusInitial }, opacity: config.POP_INITIAL_OPACITY }, { attr: { r: config.POP_FINAL_RADIUS }, opacity: 0, duration: config.POP_DURATION, ease: "power2.out", onComplete: () => { ring.remove(); animationsComplete++; if (animationsComplete === targetDots.length) { startCurrentEffect(); } } }); }); domRefs.svgElement.appendChild(fragment); }
+        function triggerShakeEffect() { if (state.masterMode === 'sleep' || !gsap || !Array.isArray(state.dots) || state.dots.length === 0) { console.warn("triggerShakeEffect: Preconditions failed."); return; }
+            logMessage(getNextMessage('shake')); // Use new message getter
+            stopCurrentEffect(); const shakeAmount = config.SHAKE_AMOUNT; const partDuration = config.SHAKE_DURATION / 3; let timelinesComplete = 0; const validDots = state.dots.filter(dot => dot && dot.el instanceof SVGElement && typeof dot.cx === 'number' && typeof dot.cy === 'number'); if (validDots.length === 0) { startCurrentEffect(); return; } validDots.forEach((dot) => { gsap.killTweensOf(dot.el, "attr"); const tl = gsap.timeline({ delay: gsap.utils.random(0, config.SHAKE_DELAY_MAX), onComplete: () => { timelinesComplete++; if (timelinesComplete === validDots.length) { startCurrentEffect(); } } }); const randX1 = dot.cx + gsap.utils.random(-shakeAmount, shakeAmount); const randY1 = dot.cy + gsap.utils.random(-shakeAmount, shakeAmount); const randX2 = dot.cx + gsap.utils.random(-shakeAmount, shakeAmount); const randY2 = dot.cy + gsap.utils.random(-shakeAmount, shakeAmount); tl.to(dot.el, { attr: { cx: randX1, cy: randY1 }, duration: partDuration, ease: "power1.inOut" }).to(dot.el, { attr: { cx: randX2, cy: randY2 }, duration: partDuration, ease: "power1.inOut" }).to(dot.el, { attr: { cx: dot.cx, cy: dot.cy }, duration: partDuration, ease: "power1.inOut" }); }); }
+        function triggerPulseEffect() { if (state.masterMode === 'sleep' || !gsap || !Array.isArray(state.dots) || state.dots.length === 0) { console.warn("triggerPulseEffect: Preconditions failed."); return; }
+            logMessage(getNextMessage('pulse')); // Use new message getter
+            stopCurrentEffect(); const dotElements = state.dots.map(d => d.el).filter(el => el instanceof SVGElement); if (dotElements.length === 0) { startCurrentEffect(); return; } const centerX = geometry.gridCenter.x; const centerY = geometry.gridCenter.y; let maxDist = 0; state.dots.forEach(dot => { const d = distance(centerX, centerY, dot.cx, dot.cy); if (d > maxDist) maxDist = d; }); maxDist = Math.max(maxDist, config.EPSILON); gsap.killTweensOf(dotElements, "attr"); gsap.to(dotElements, { duration: config.PULSE_DURATION / 2, attr: { r: (i, target) => (state.dots.find(d => d.el === target)?.initialR ?? dotRadiusInitial) + config.PULSE_MAX_RADIUS_INCREASE, cy: (i, target) => (state.dots.find(d => d.el === target)?.cy ?? 0) - config.PULSE_MAX_Y_DISPLACEMENT }, ease: "power1.out", yoyo: true, repeat: 1, stagger: (index, target) => { const dotData = state.dots.find(d => d.el === target); if (!dotData) return 0; const dist = distance(centerX, centerY, dotData.cx, dotData.cy); return (dist / maxDist) * config.PULSE_TOTAL_STAGGER; }, onComplete: () => { state.dots.forEach(dot => { if(dot) resetDotToInitialVisuals(dot, false); }); startCurrentEffect(); } }); }
+
+        // ==========================================================================
+        // 11. Mouse/Touch Handling Functions (Hover Effects)
+        // ==========================================================================
+        function applyHoverEffect(svgX, svgY) { if (!gsap || !Array.isArray(state.dots) || state.dots.length === 0 || !geometry.scaleFactor || geometry.scaleFactor <= 0) return; const hoverRadiusSVG = state.hoverFalloff / geometry.scaleFactor; const visualCursorRadiusSVG = hoverRadiusSVG / 2; if (domRefs.cursorGravityCircle) { gsap.set(domRefs.cursorGravityCircle, { attr: { cx: svgX, cy: svgY, r: visualCursorRadiusSVG } }); } state.dots.forEach(dot => { if (!dot || !dot.el || !dot.initialFill || !dot.hoverFill) return; const dx = svgX - dot.cx; const dy = svgY - dot.cy; const dist = Math.sqrt(dx * dx + dy * dy); const linearIntensity = clamp(1 - (dist / hoverRadiusSVG), 0, 1); const targetColor = linearIntensity > 0.01 ? dot.hoverFill : dot.initialFill; if (dot.currentFill !== targetColor) { setDotFill(dot, targetColor, false); } const shiftIntensity = linearIntensity; let targetCx = dot.cx; let targetCy = dot.cy; if (shiftIntensity > 0 && dist > config.EPSILON) { const powerInternal = state.hoverPower; const powerSVG = powerInternal / geometry.scaleFactor; const directionMultiplier = state.activeHoverMode === 'attract' ? 1 : -1; const shiftAmount = powerSVG * shiftIntensity; targetCx += (dx / dist) * shiftAmount * directionMultiplier; targetCy += (dy / dist) * shiftAmount * directionMultiplier; } gsap.to(dot.el, { attr: { cx: targetCx, cy: targetCy }, duration: config.ANIMATION_DURATION_HOVER_POS, ease: 'power1.out', overwrite: "auto" }); }); }
+        function getSvgCoordinates(screenX, screenY) { if (!geometry.ctmInverse && domRefs.svgElement) { try { const ctm = domRefs.svgElement.getScreenCTM(); if (ctm) geometry.ctmInverse = ctm.inverse(); } catch (e) { console.error("Error getting/inverting CTM:", e); return null; } } if (!geometry.ctmInverse) { console.error("getSvgCoordinates: CTM inverse unavailable."); return null; } if (!domRefs.svgElement) { console.error("getSvgCoordinates: SVG Element missing."); return null; } const pt = domRefs.svgElement.createSVGPoint(); pt.x = screenX; pt.y = screenY; try { return pt.matrixTransform(geometry.ctmInverse); } catch (e) { console.error("Error transforming coordinates:", e); return null; } }
+        function handleMouseEnter(event) { if (state.isDraggingSvg || !domRefs.svgElement || state.masterMode === 'sleep') return; state.isMouseOverSvg = true; if (state.masterMode === 'activated') { domRefs.svgElement.addEventListener('mousemove', handleMouseMove); } domRefs.svgElement.classList.add('mouse-over'); }
+        function handleMouseMove(event) { if (state.isDraggingDial || state.isDraggingSvg || state.masterMode === 'sleep') return; const svgMousePoint = getSvgCoordinates(event.clientX, event.clientY); if (!svgMousePoint) return; applyHoverEffect(svgMousePoint.x, svgMousePoint.y); }
+        function handleMouseLeave(event) { if (state.isDraggingSvg || !domRefs.svgElement) return; state.isMouseOverSvg = false; domRefs.svgElement.removeEventListener('mousemove', handleMouseMove); domRefs.svgElement.classList.remove('mouse-over'); if (state.masterMode !== 'sleep' && !state.isDraggingDial) { if (!gsap || !Array.isArray(state.dots)) return; state.dots.forEach(dot => { if (dot?.el instanceof SVGElement && dot.initialFill) { resetDotToInitialVisuals(dot, true); } }); } }
+        function handleTouchStart(e) { if (state.isDraggingDial || state.masterMode === 'sleep' || !e.touches || e.touches.length === 0) return; e.preventDefault(); state.isDraggingSvg = true; state.isMouseOverSvg = true; document.addEventListener('touchmove', handleTouchMove, { passive: false }); document.addEventListener('touchend', handleTouchEnd); document.addEventListener('touchcancel', handleTouchEnd); domRefs.svgElement.classList.add('mouse-over'); const touch = e.touches[0]; const svgTouchPoint = getSvgCoordinates(touch.clientX, touch.clientY); if (svgTouchPoint) { applyHoverEffect(svgTouchPoint.x, svgTouchPoint.y); } }
+        function handleTouchMove(e) { if (!state.isDraggingSvg || state.isDraggingDial || state.masterMode === 'sleep' || !e.touches || e.touches.length === 0) return; e.preventDefault(); const touch = e.touches[0]; const svgTouchPoint = getSvgCoordinates(touch.clientX, touch.clientY); if (svgTouchPoint) { applyHoverEffect(svgTouchPoint.x, svgTouchPoint.y); } }
+        function handleTouchEnd(e) { if (!state.isDraggingSvg) return; state.isDraggingSvg = false; state.isMouseOverSvg = false; document.removeEventListener('touchmove', handleTouchMove); document.removeEventListener('touchend', handleTouchEnd); document.removeEventListener('touchcancel', handleTouchEnd); domRefs.svgElement.classList.remove('mouse-over'); if (state.masterMode !== 'sleep') { if (!gsap || !Array.isArray(state.dots)) return; state.dots.forEach(dot => { if (dot?.el instanceof SVGElement && dot.initialFill) { resetDotToInitialVisuals(dot, true); } }); } }
+
+        // ==========================================================================
+        // 12. Master Mode Functions (Sleep/Activated)
+        // ==========================================================================
+        function setSleepDimmedState(isDimmed) {
+            document.body.classList.toggle('app-sleeping', isDimmed);
+            const allControls = document.querySelectorAll('#control-console-frame button, #control-console-frame input[type=range], #control-console-frame .hue-slider-track, #control-console-frame .hue-slider-thumb-container'); // Include new slider parts
+            allControls.forEach(ctrl => {
+                const isMasterOnButton = ctrl.closest('#master-toggle') && ctrl.dataset.masterMode === 'activated';
+                // Disable buttons/inputs directly
+                if (ctrl.tagName === 'BUTTON' || ctrl.tagName === 'INPUT') {
+                    ctrl.disabled = isDimmed && !isMasterOnButton;
+                }
+                // For slider parts, rely on the .app-sleeping .dimmable-content CSS rule and JS checks
+            });
+        }
+        function enterSleepMode() {
+            if (state.masterMode === 'sleep') return;
+            state.masterMode = 'sleep';
+            logMessage(getNextMessage('sleep')); // Use new message getter
+            stopCurrentEffect(); if (state.isMouseOverSvg) { handleMouseLeave(); } setSleepDimmedState(true); if(domRefs.svgElement) domRefs.svgElement.classList.remove('mouse-over'); if (gsap && state.dots.length > 0) { const sleepColor = getComputedStyle(document.documentElement).getPropertyValue('--dot-sleep-color').trim() || '#B3BFCD'; const dotElementsToSleep = state.dots.map(d => d?.el).filter(el => el instanceof SVGElement); if (dotElementsToSleep.length > 0) { gsap.to(dotElementsToSleep, { duration: gsap.utils.random(0.5, 0.8), delay: gsap.utils.random(0, 0.6), ease: 'power2.inOut', attr: { r: 1, cy: geometry.gridCenter.y }, fill: sleepColor, overwrite: true, stagger: 0.002, onStart: (dotIndex) => { const targetElement = dotElementsToSleep[dotIndex]; const dot = state.dots.find(d => d.el === targetElement); if (dot) dot.currentFill = sleepColor; } }); } }
+        }
+        function enterActivatedMode() {
+            if (state.masterMode === 'activated') return;
+            state.masterMode = 'activated';
+            logMessage(getNextMessage('activate')); // Use new message getter
+            setSleepDimmedState(false); applyTheme(state.currentTheme, false); startIntroAnimation();
+        }
+
+        // ==========================================================================
+        // 13. Intro Animation (Activation)
+        // ==========================================================================
+        function startIntroAnimation() { const dotElements = state.dots.map(d => d?.el).filter(el => el instanceof SVGElement); if (!dotElements.length) { startCurrentEffect(); return; } const gridWidth = DATA_BOUNDS.width > 0 ? DATA_BOUNDS.width : 1; const sleepColor = getComputedStyle(document.documentElement).getPropertyValue('--dot-sleep-color').trim() || '#B3BFCD'; gsap.killTweensOf(dotElements); gsap.set(dotElements, { fill: sleepColor, attr: { cx: (i, t) => state.dots.find(d => d.el === t)?.cx ?? 0, cy: geometry.gridCenter.y, r: 1 } }); state.dots.forEach(d => { if (d) { d.currentFill = sleepColor; }}); gsap.to(dotElements, { duration: config.INTRO_ANIM_DURATION, delay: () => gsap.utils.random(0, config.INTRO_ANIM_RANDOM_DELAY), attr: { cx: (i, t) => state.dots.find(d => d.el === t)?.cx ?? 0, cy: (i, t) => state.dots.find(d => d.el === t)?.cy ?? 0, r: (i, t) => state.dots.find(d => d.el === t)?.initialR ?? dotRadiusInitial }, fill: (i, t) => state.dots.find(d => d.el === t)?.initialFill ?? '#000', stagger: (index, target) => { const dotData = state.dots.find(d => d.el === target); if (!dotData) return 0; const normalizedX = (dotData.cx - DATA_BOUNDS.minX) / gridWidth; return normalizedX * config.INTRO_ANIM_STAGGER * Math.max(1, dotElements.length); }, ease: "power2.out", overwrite: true, onStart: () => { state.dots.forEach(d => { if(d) d.currentFill = d.initialFill; }); }, onComplete: () => { startCurrentEffect(); } }); }
+
+        // ==========================================================================
+        // 14. Control Logic & Update Functions
+        // ==========================================================================
+        function updateDialVisuals(dialEl, indicatorEl, valueEl, angleDeg, formatFn = Math.round) { if (!(dialEl instanceof SVGElement) || !(indicatorEl instanceof SVGGElement) || !(valueEl instanceof HTMLElement)) return NaN; if (typeof angleDeg !== 'number' || isNaN(angleDeg)) angleDeg = config.DIAL_ANGLE_PHYSICAL_MIN; if (typeof formatFn !== 'function') formatFn = Math.round; const dialId = dialEl.dataset.dialId; const dConfig = dialConfigs[dialId]; if (!dConfig) { console.error(`updateDialVisuals: Config not found for dial ID '${dialId}'`); valueEl.textContent = 'Err'; return NaN; } const finalAngle = dConfig.fullRange ? (angleDeg % 360 + 360) % 360 : getClampedAngle(angleDeg); indicatorEl.setAttribute('transform', `rotate(${finalAngle})`); const value = dConfig.fullRange ? angleToValue360(finalAngle, dConfig.displayMin, dConfig.displayMax) : angleToValue(finalAngle, dConfig.displayMin, dConfig.displayMax); valueEl.textContent = formatFn(value); return value; }
+        function setActiveEffect(newEffect) { if (!newEffect || (newEffect !== 'wave' && newEffect !== 'sparkle') || (newEffect === state.activeEffect)) return; stopCurrentEffect(); state.dots.forEach(dot => { if(dot) resetDotToInitialVisuals(dot, false); }); state.activeEffect = newEffect; updateEffectDialsVisibility(); startCurrentEffect(); }
+        function updateEffectDialsVisibility() { if (!domRefs.waveControls || !domRefs.sparkleControls) { console.error("updateEffectDialsVisibility: Control refs missing."); return; } const showWave = state.activeEffect === 'wave'; const showSparkle = state.activeEffect === 'sparkle'; try { domRefs.waveControls.forEach(el => { el.style.display = showWave ? 'flex' : 'none'; }); domRefs.sparkleControls.forEach(el => { el.style.display = showSparkle ? 'flex' : 'none'; }); } catch (error) { console.error("Error updating dial visibility:", error); } }
+
+        // --- NEW Hue Slider Functions ---
+        function calculateHueSliderState(clientX) {
+            if (!state.hueSliderTrackRect) state.hueSliderTrackRect = domRefs.hueTrack.getBoundingClientRect();
+            let positionX = clientX - state.hueSliderTrackRect.left;
+            positionX = clamp(positionX, 0, state.hueSliderTrackRect.width);
+            const percent = clamp((positionX / state.hueSliderTrackRect.width) * 100, 0, 100);
+            const value = Math.round((percent / 100) * 360);
+            return { percent, value };
+        }
+
+        function setHueSliderPosition(percent, value, animate = false) {
+            // Update the visual position of the thumb using GSAP
+            gsap.killTweensOf(domRefs.hueThumbContainer, { targets: 'left', overwrite: true });
+
+            const clickAnimDuration = getCssVarAsNumber('--gsap-slider-click-duration') || 0.08;
+
+            if (animate) {
+                gsap.to(domRefs.hueThumbContainer, {
+                    left: `${percent}%`,
+                    duration: clickAnimDuration,
+                    ease: 'power1.out'
+                });
+            } else {
+                gsap.set(domRefs.hueThumbContainer, { left: `${percent}%` });
+            }
+
+            // Update the DFX state and trigger theme update (debounced)
+            if (state.brandHue !== value) {
+                state.brandHue = value;
+                clearTimeout(state.hueUpdateTimer);
+                updateThemeColors(false); // Quick update for responsiveness
+                state.hueUpdateTimer = setTimeout(() => {
+                    updateThemeColors(true); // Full update including dots
+                    if (state.masterMode === 'activated' && state.currentTheme === 'saturated') {
+                        startCurrentEffect(); // Restart effect if needed for saturated theme
+                    }
+                }, config.HUE_UPDATE_DEBOUNCE);
+            }
+        }
+
+        function animateHueIconGrade(targetGrade) {
+            if (!domRefs.thumbIcon) return;
+            const iconAnimDuration = getCssVarAsNumber('--gsap-slider-icon-duration') || 0.1;
+            const iconAnimEase = getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-icon-ease').trim() || 'power1.out';
+
+            gsap.killTweensOf(domRefs.thumbIcon, { targets: '--slider-thumb-icon-grad', overwrite: true });
+            gsap.to(domRefs.thumbIcon, {
+                '--slider-thumb-icon-grad': targetGrade,
+                duration: iconAnimDuration,
+                ease: iconAnimEase
+            });
+        }
+
+        function handleHueSliderStart(event) {
+            if (state.masterMode === 'sleep') return;
+            event.preventDefault();
+            state.isDraggingHueSlider = true;
+            state.hueSliderTrackRect = domRefs.hueTrack.getBoundingClientRect();
+            domRefs.hueThumbContainer.style.cursor = 'grabbing';
+            document.body.style.cursor = 'grabbing';
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const { percent, value } = calculateHueSliderState(clientX);
+            state.initialHueOnDragStart = state.brandHue; // Capture initial hue
+            const isTrackClick = event.target === domRefs.hueTrack;
+            setHueSliderPosition(percent, value, isTrackClick); // Animate jump on track click
+
+            document.addEventListener('mousemove', handleHueSliderMove);
+            document.addEventListener('touchmove', handleHueSliderMove, { passive: false });
+            document.addEventListener('mouseup', handleHueSliderEnd);
+            document.addEventListener('touchend', handleHueSliderEnd);
+            document.addEventListener('mouseleave', handleHueSliderMouseLeave); // Handle leaving window while dragging
+        }
+
+        function handleHueSliderMove(event) {
+            if (!state.isDraggingHueSlider || state.masterMode === 'sleep') return;
+            if (event.type === 'touchmove') {
+                event.preventDefault(); // Prevent scrolling on touch devices
+            }
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const { percent, value } = calculateHueSliderState(clientX);
+            setHueSliderPosition(percent, value, false); // No animation during drag
+        }
+
+         function handleHueSliderEnd(event) {
+            if (state.isDraggingHueSlider) {
+                const finalHue = state.brandHue;
+                const initialHue = state.initialHueOnDragStart;
+                const hueDiff = Math.abs(finalHue - initialHue);
+                // Log message only if hue changed significantly OR color category changed
+                if (hueDiff >= config.HUE_CHANGE_THRESHOLD || getHueCategory(finalHue) !== getHueCategory(initialHue)) {
+                    const colorCategoryKey = getHueCategory(finalHue);
+                    if (colorCategoryKey) {
+                        logMessage(getNextMessage(colorCategoryKey));
+                    }
+                }
+
+                // Reset state and cursors
+                state.isDraggingHueSlider = false;
+                domRefs.hueThumbContainer.style.cursor = 'grab';
+                document.body.style.cursor = '';
+
+                // Reset icon grade if mouse is NOT over the container anymore
+                if (!domRefs.hueSliderContainer.matches(':hover')) {
+                    const iconDefaultGrade = getCssVarAsNumber('--slider-thumb-icon-grad') || -25;
+                    animateHueIconGrade(iconDefaultGrade);
+                    // Also reset track height if mouse leaves container entirely
+                    gsap.to(domRefs.hueTrack, {
+                        '--slider-mask-height-factor': 1,
+                        duration: getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.3,
+                        ease: getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-track-leave-ease').trim() || 'power2.out',
+                        overwrite: true
+                    });
+                }
+                // else: if mouse IS still over, the 'mouseenter' logic keeps it hovered/expanded
+
+                document.removeEventListener('mousemove', handleHueSliderMove);
+                document.removeEventListener('touchmove', handleHueSliderMove);
+                document.removeEventListener('mouseup', handleHueSliderEnd);
+                document.removeEventListener('touchend', handleHueSliderEnd);
+                document.removeEventListener('mouseleave', handleHueSliderMouseLeave);
+            }
+        }
+
+        function handleHueSliderMouseLeave(event) {
+             // End drag if mouse leaves the browser window while dragging
+             if (state.isDraggingHueSlider && (!event.relatedTarget || event.relatedTarget.nodeName === 'HTML')) {
+                 handleHueSliderEnd(event);
+             }
+             // Note: The icon grade and track height reset on actual mouseleave (not dragging)
+             // are handled by the 'mouseleave' listener added in initializeHueSlider.
+        }
+
+        function initializeHueSlider() {
+            if (!domRefs.hueSliderContainer || !domRefs.hueTrack || !domRefs.hueThumbContainer || !domRefs.thumbIcon) {
+                console.error("initializeHueSlider: Missing required DOM elements.");
+                return;
+            }
+            // Set initial slider position based on DFX state
+            const initialPercent = (state.brandHue / 360) * 100;
+            setHueSliderPosition(initialPercent, state.brandHue, false);
+
+            // --- Event Listeners ---
+            domRefs.hueThumbContainer.addEventListener('mousedown', handleHueSliderStart);
+            domRefs.hueThumbContainer.addEventListener('touchstart', handleHueSliderStart, { passive: false });
+            domRefs.hueTrack.addEventListener('mousedown', handleHueSliderStart);
+            domRefs.hueTrack.addEventListener('touchstart', handleHueSliderStart, { passive: false });
+
+            // Icon Hover Animation (using GSAP)
+            const iconDefaultGrade = getCssVarAsNumber('--slider-thumb-icon-grad') || -25;
+            const iconHoverGrade = 200; // Hardcoded hover target, could be CSS var
+
+            // Track Height Animation (using GSAP)
+            const trackEnterDuration = getCssVarAsNumber('--gsap-slider-track-enter-duration') || 0.1;
+            const trackLeaveDuration = getCssVarAsNumber('--gsap-slider-track-leave-duration') || 0.3;
+            const trackLeaveEase = getComputedStyle(document.documentElement).getPropertyValue('--gsap-slider-track-leave-ease').trim() || 'power2.out';
+
+            domRefs.hueSliderContainer.addEventListener('mouseenter', () => {
+                if (state.masterMode !== 'sleep') {
+                    animateHueIconGrade(iconHoverGrade);
+                    // Animate masks shrinking (factor to 0)
+                    gsap.to(domRefs.hueTrack, {
+                        '--slider-mask-height-factor': 0,
+                        duration: trackEnterDuration,
+                        ease: 'sine.out', // Fast ease-out for enter
+                        overwrite: true
+                    });
+                }
+            });
+            domRefs.hueSliderContainer.addEventListener('mouseleave', () => {
+                if (state.masterMode !== 'sleep') {
+                    // Only reset grade if not currently dragging the thumb
+                    if (!state.isDraggingHueSlider) {
+                       animateHueIconGrade(iconDefaultGrade);
+                       // Animate masks growing back (factor to 1)
+                       gsap.to(domRefs.hueTrack, {
+                           '--slider-mask-height-factor': 1,
+                           duration: trackLeaveDuration,
+                           ease: trackLeaveEase, // Slower, smoother ease for leave
+                           overwrite: true
+                       });
+                    }
+                }
+            });
+
+            // Reset track bounding rect on resize/orientation change
+            window.addEventListener('resize', () => { state.hueSliderTrackRect = null; });
+            window.addEventListener('orientationchange', () => { state.hueSliderTrackRect = null; });
+            console.log("Custom Hue Slider Initialized for DFX Console.");
+        }
+        // --- END NEW Hue Slider Functions ---
+
+
+        // ==========================================================================
+        // 15. Event Listener Setup
+        // ==========================================================================
+        function setupEventListeners() {
+            const requiredRefs = ['effectTypeToggle', 'hoverTypeToggle', 'tapButton', 'jiggleButton', 'waveTapButton', 'svgElement', 'masterToggle', 'themeToggle', 'hueSliderContainer', 'masterTitle', 'consolePanel', 'masterPanelWrapper', 'footerCredit'];
+            for (const refName of requiredRefs) { if (!domRefs[refName]) { throw new Error(`Listener setup fail: Missing '${refName}'!`); } }
+            const handleDialMouseDown = (e) => { if (state.masterMode === 'sleep') return; const dial = e.target.closest('.dial-svg'); if (!dial || !dial.dataset.dialId) return; const container = dial.closest('.dial-container'); if (container && container.style.display === 'none') return; e.preventDefault(); const dialId = dial.dataset.dialId; const dConfig = dialConfigs[dialId]; if (!dConfig) return; state.isDraggingDial = true; state.dragDialInfo.element = dial; state.dragDialInfo.hitMin = false; state.dragDialInfo.hitMax = false; const indicator = domRefs[`indicator_${dialId}`]; if(indicator) { const transformAttr = indicator.getAttribute('transform'); const initialAngleMatch = transformAttr ? transformAttr.match(/rotate\((.*?)\)/) : null; const initialAngle = initialAngleMatch ? parseFloat(initialAngleMatch[1]) : 0; state.dragDialInfo.initialValue = dConfig.fullRange ? angleToValue360(initialAngle, dConfig.displayMin, dConfig.displayMax) : angleToValue(initialAngle, dConfig.displayMin, dConfig.displayMax); } else { state.dragDialInfo.initialValue = null; } const rect = dial.getBoundingClientRect(); state.dragDialInfo.center.x = rect.left + rect.width / 2; state.dragDialInfo.center.y = rect.top + rect.height / 2; dial.style.cursor = 'grabbing'; document.body.style.cursor = 'grabbing'; document.addEventListener('mousemove', handleDialMouseMove); document.addEventListener('mouseup', handleDialMouseUp); document.addEventListener('mouseleave', handleDialMouseUp); };
+            const handleDialMouseMove = (e) => { if (state.masterMode === 'sleep' || !state.isDraggingDial || !state.dragDialInfo.element) return; e.preventDefault(); const dial = state.dragDialInfo.element; const dialId = dial.dataset.dialId; const dConfig = dialConfigs[dialId]; if (!dConfig) return; const dx = e.clientX - state.dragDialInfo.center.x; const dy = e.clientY - state.dragDialInfo.center.y; let rawAngleDeg = (radiansToDegrees(Math.atan2(dy, dx)) + 360) % 360; const finalAngle = dConfig.fullRange ? rawAngleDeg : getClampedAngle(rawAngleDeg); const indicator = domRefs[`indicator_${dialId}`]; const valueSpan = domRefs[`value_${dialId}`]; if (!indicator || !valueSpan) return; const displayedValue = updateDialVisuals(dial, indicator, valueSpan, finalAngle, dConfig.formatFn); if (isNaN(displayedValue)) return; const internalValue = mapRange(displayedValue, dConfig.displayMin, dConfig.displayMax, dConfig.internalMin, dConfig.internalMax); state[dConfig.stateProp] = internalValue; state.dragDialInfo.hitMin = (Math.abs(displayedValue - dConfig.displayMin) < config.EPSILON); state.dragDialInfo.hitMax = (Math.abs(displayedValue - dConfig.displayMax) < config.EPSILON); if (dConfig.needsSvgRecalc) setupSvg(); if (dConfig.needsEffectRestart) startCurrentEffect(); };
+            const handleDialMouseUp = (e) => {
+                if (state.isDraggingDial) {
+                    const dial = state.dragDialInfo.element;
+                    if (dial) {
+                        dial.style.cursor = 'grab';
+                        const dialId = dial.dataset.dialId;
+                        const dConfig = dialConfigs[dialId];
+                        const indicator = domRefs[`indicator_${dialId}`];
+                        const valueSpan = domRefs[`value_${dialId}`];
+                        const labelSpan = dial.closest('.dial-container')?.querySelector('.dial-label');
+
+                        if(dConfig && indicator && valueSpan && labelSpan && state.dragDialInfo.initialValue !== null) {
+                            const transformAttr = indicator.getAttribute('transform');
+                            const finalAngleMatch = transformAttr ? transformAttr.match(/rotate\((.*?)\)/) : null;
+                            const finalAngle = finalAngleMatch ? parseFloat(finalAngleMatch[1]) : 0;
+                            const finalValue = dConfig.fullRange ? angleToValue360(finalAngle, dConfig.displayMin, dConfig.displayMax) : angleToValue(finalAngle, dConfig.displayMin, dConfig.displayMax);
+                            const initialValue = state.dragDialInfo.initialValue;
+                            const valueChanged = Math.abs(finalValue - initialValue) > config.EPSILON;
+
+                            // --- Dial Logging Logic ---
+                            if (state.dragDialInfo.hitMax && valueChanged) {
+                                logMessage(getNextMessage('dialMax'));
+                            } else if (state.dragDialInfo.hitMin && valueChanged) {
+                                logMessage(getNextMessage('dialMin'));
+                            } else if (valueChanged) {
+                                if (dialId === 'sparkleFreq') {
+                                    logMessage(getNextMessage(finalValue > initialValue ? 'dialIncreaseFreq' : 'dialDecreaseFreq'));
+                                } else if (dialId === 'waveDirection') {
+                                     const angle = Math.round(finalValue);
+                                     if (angle >= 15 && angle <= 75) logMessage(getNextMessage('directionEast'));
+                                     else if (angle >= 105 && angle <= 165) logMessage(getNextMessage('directionSouth'));
+                                     else if (angle >= 195 && angle <= 255) logMessage(getNextMessage('directionWest'));
+                                     else if (angle >= 285 && angle <= 345) logMessage(getNextMessage('directionNorth'));
+                                     else logMessage(getNextMessage('directionGeneral'));
+                                } else {
+                                    logMessage(getNextMessage(finalValue > initialValue ? 'dialIncreaseGeneric' : 'dialDecreaseGeneric'));
+                                }
+                            }
+                            // --- End Dial Logging Logic ---
+                        }
+                    }
+                    document.body.style.cursor = ''; state.isDraggingDial = false; state.dragDialInfo.element = null; state.dragDialInfo.initialValue = null; state.dragDialInfo.hitMin = false; state.dragDialInfo.hitMax = false; document.removeEventListener('mousemove', handleDialMouseMove); document.removeEventListener('mouseup', handleDialMouseUp); document.removeEventListener('mouseleave', handleDialMouseUp);
+                 }
+            };
+            const controlSectionContainer = document.getElementById('control-section');
+            if (controlSectionContainer) controlSectionContainer.addEventListener('mousedown', handleDialMouseDown); else console.error("Cannot find #control-section to attach dial listener");
+            domRefs.masterToggle.addEventListener('click', (e) => { const button = e.target.closest('button'); if (!button || !button.dataset.masterMode || button.classList.contains('active')) return; const newValue = button.dataset.masterMode; initializeToggle(domRefs.masterToggle, newValue, 'masterMode'); if (newValue === 'sleep') enterSleepMode(); else enterActivatedMode(); });
+            domRefs.themeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.theme || button.classList.contains('active')) return; const newValue = button.dataset.theme; initializeToggle(domRefs.themeToggle, newValue, 'theme');
+                const themeMessageKey = themes[newValue]?.messageKey || 'themeLight'; // Fallback just in case
+                logMessage(getNextMessage(themeMessageKey));
+                applyTheme(newValue);
+            });
+            domRefs.effectTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.effectType || button.classList.contains('active')) return; const newValue = button.dataset.effectType; initializeToggle(domRefs.effectTypeToggle, newValue, 'effectType');
+                logMessage(getNextMessage(newValue === 'wave' ? 'effectWave' : 'effectSparkle'));
+                setActiveEffect(newValue);
+            });
+            domRefs.hoverTypeToggle.addEventListener('click', (e) => { if (state.masterMode === 'sleep') return; const button = e.target.closest('button'); if (!button || !button.dataset.hoverType || button.classList.contains('active')) return; const newValue = button.dataset.hoverType; initializeToggle(domRefs.hoverTypeToggle, newValue, 'hoverType');
+                 logMessage(getNextMessage(newValue === 'attract' ? 'hoverAttract' : 'hoverRepel'));
+                 state.activeHoverMode = newValue;
+            });
+
+            domRefs.tapButton.addEventListener('click', triggerPopEffect);
+            domRefs.jiggleButton.addEventListener('click', triggerShakeEffect);
+            domRefs.waveTapButton.addEventListener('click', triggerPulseEffect);
+            domRefs.svgElement.addEventListener('mouseenter', handleMouseEnter);
+            domRefs.svgElement.addEventListener('mouseleave', handleMouseLeave);
+            domRefs.svgElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+            window.addEventListener('resize', () => { clearTimeout(state.resizeTimer); state.resizeTimer = setTimeout(() => { setupSvg(); state.hueSliderTrackRect = null; /* Reset slider rect too */ }, 250); });
+            window.addEventListener('orientationchange', () => { state.hueSliderTrackRect = null; }); // Reset slider rect on orientation change
+
+        }
+
+        // ==========================================================================
+        // 16. Initialization Execution
+        // ==========================================================================
+        function main() {
+            console.log("Initializing Application (v99 Refined v18 - New Logo, Dynamic Text)..."); // Version updated
+            try {
+                if (typeof gsap === 'undefined') throw new Error("GSAP library is not loaded!");
+                if (!populateDomRefs()) throw new Error("Failed to populate critical DOM references.");
+                setupSvg();
+                initializeControls(); // This now initializes the new slider too
+                setupEventListeners();
+                setTimeout(() => {
+                     if (state.masterMode === 'sleep') {
+                         logMessage(getNextMessage('sleep')); // Use initial sleep message
+                         setSleepDimmedState(true); initializeToggle(domRefs.masterToggle, state.masterMode, 'masterMode');
+                         if (gsap && state.dots.length > 0) { const sleepColor = getComputedStyle(document.documentElement).getPropertyValue('--dot-sleep-color').trim() || '#B3BFCD'; const dotElementsToSleep = state.dots.map(d => d?.el).filter(el => el instanceof SVGElement); if (dotElementsToSleep.length > 0) { gsap.to(dotElementsToSleep, { duration: 0.5, attr: { r: 1, cy: geometry.gridCenter.y }, fill: sleepColor, overwrite: true, stagger: 0.002 }); } state.dots.forEach(d => { if(d) d.currentFill = sleepColor; }); }
+                     } else {
+                         logMessage(getNextMessage('startup')); // Use startup message
+                         setSleepDimmedState(false);
+                         initializeToggle(domRefs.masterToggle, state.masterMode, 'masterMode');
+                         startIntroAnimation();
+                     }
+                     const consoleColor = getComputedStyle(document.documentElement).getPropertyValue('--console-text-color').trim(); if(domRefs.messageBoxContent) domRefs.messageBoxContent.style.color = consoleColor;
+                }, 50);
+            } catch (error) { console.error("=== INITIALIZATION FAILED ===", error); document.body.innerHTML = `<div style="color: red; border: 0.125rem solid red; padding: 1.25rem; font-family: sans-serif; margin: 1.25rem; background-color: #fee;"><h2>Initialization Error</h2><p>The interactive grid could not be started. Please check the browser console (F12) for more details.</p><p><strong>Error:</strong> ${error.message}</p></div>`; }
+        }
+
+        // --- Start the application ---
+        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', main); } else { main(); }
+
+    })(); // End of IIFE
+    </script>
+</body>
+</html>
